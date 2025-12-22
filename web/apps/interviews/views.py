@@ -1,18 +1,19 @@
-# web/apps/interviews/views.py
-
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render, get_object_or_404
 from django.views import View
-from django.utils import timezone
 
-from .models import Interview, InterviewQuestion
-from .services import InterviewFlowService, QuestionService
+from apps.interviews.models import Interview, InterviewQuestion
+from apps.interviews.services import InterviewFlowService
 
 
 class CandidateInterviewView(View):
     """
     MVP-View для чата кандидата.
-    - GET: показывает текущий вопрос и историю ответов
-    - POST: сохраняет ответ и показывает следующий вопрос или сообщение о завершении интервью
+    Flow:
+    1. Показываем один текущий вопрос (pending или repeat)
+    2. Сохраняем ответ
+    3. Если ответ корректный → отмечаем answered и показываем следующий
+    4. Если некорректный → помечаем repeat и показываем тот же вопрос снова
+    5. Когда все вопросы answered → интервью завершено
     """
 
     template_name = "interviews/chat.html"
@@ -20,38 +21,43 @@ class CandidateInterviewView(View):
     def get_interview(self) -> Interview:
         """
         На MVP выбираем первое доступное интервью.
-        Позже здесь будет фильтр по токену.
+        Позже сюда будет фильтр по токену.
         """
         return Interview.objects.first()
 
     def get(self, request):
         interview = self.get_interview()
-        # Получаем следующий pending вопрос
-        question = QuestionService.get_next(interview)
+        flow = InterviewFlowService(interview)
+        current_question = flow.get_current_question()
 
         context = {
             "interview": interview,
-            "current_question": question,
+            "current_question": current_question,
         }
         return render(request, self.template_name, context)
 
     def post(self, request):
         interview = self.get_interview()
+        flow = InterviewFlowService(interview)
 
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text")
 
         question = get_object_or_404(InterviewQuestion, id=question_id)
 
-        # Сохраняем ответ и обновляем статус через сервис
-        flow = InterviewFlowService(interview)
-        flow.submit_answer(question, answer_text)
+        # ===== MVP: эмуляция проверки ответа =====
+        # Пока ИИ нет — мы сами решаем, корректный ли ответ
+        # Для теста можно менять на False, чтобы проверить повтор вопроса
+        is_correct = True
 
-        # Получаем следующий вопрос после отправки ответа
-        next_question = QuestionService.get_next(interview)
+        # Отправляем ответ через flow
+        flow.submit_answer(question, answer_text, is_correct)
+
+        # Получаем следующий вопрос для отображения
+        current_question = flow.get_current_question()
 
         context = {
             "interview": interview,
-            "current_question": next_question,
+            "current_question": current_question,
         }
         return render(request, self.template_name, context)

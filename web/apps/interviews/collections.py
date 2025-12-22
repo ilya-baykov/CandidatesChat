@@ -2,6 +2,8 @@ class AnswerCodes:
     PENDING = "pending"
     ANSWERED = "answered"
     SCORED = "scored"
+    REPEAT = "repeat"
+
 
 class InterviewCodes:
     DRAFT = "draft"

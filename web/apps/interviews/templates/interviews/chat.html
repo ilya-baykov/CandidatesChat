@@ -21,25 +21,32 @@
     <h2>Интервью: {{ interview.candidate.full_name }}</h2>
 
     <div class="messages">
+        {# История answered вопросов #}
         {% for q in interview.questions.all %}
-            <div class="message question">{{ q.question_text }}</div>
             {% if q.answer %}
+                <div class="message question">{{ q.question_text }}</div>
                 <div class="message answer">{{ q.answer.answer_text }}</div>
             {% endif %}
         {% endfor %}
+
+        {# Текущий вопрос (pending или repeat) #}
+        {% if current_question %}
+            <div class="message question">{{ current_question.question_text }}</div>
+        {% endif %}
     </div>
 
     {% if current_question %}
         <form method="post">
             {% csrf_token %}
             <input type="hidden" name="question_id" value="{{ current_question.id }}">
-            <textarea name="answer_text" rows="3" placeholder="Ваш ответ..." required></textarea><br>
+            <textarea name="answer_text" required></textarea>
             <button type="submit">Отправить</button>
         </form>
     {% else %}
-        <p style="text-align: center; font-weight: bold;">Интервью завершено! Спасибо за ответы.</p>
+        <p>Интервью завершено!</p>
     {% endif %}
 </div>
+
 
 <script>
     // Прокрутка истории сообщений вниз при загрузке страницы
