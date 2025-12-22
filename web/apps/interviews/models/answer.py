@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from web.apps.interviews.models.question import InterviewQuestion
+
+from .question import InterviewQuestion
 
 
 class InterviewAnswer(models.Model):

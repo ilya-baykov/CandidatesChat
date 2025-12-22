@@ -1,7 +1,9 @@
 from django.db import models
-from web.apps.interviews.models.candidate import Candidate
-from web.apps.interviews.models.vacancy import Vacancy
-from web.apps.reference.models.interview import InterviewStatus
+
+from .candidate import Candidate
+from .vacancy import Vacancy
+
+from ...reference.models import InterviewStatus
 
 
 class Interview(models.Model):

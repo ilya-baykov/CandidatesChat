@@ -1,6 +1,7 @@
 from django.db import models
-from web.apps.interviews.models.interview import Interview
-from web.apps.reference.models.interview import AnswerStatus
+
+from .interview import Interview
+from ...reference.models import AnswerStatus
 
 
 class InterviewQuestion(models.Model):

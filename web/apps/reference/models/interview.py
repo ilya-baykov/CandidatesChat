@@ -55,8 +55,8 @@ class InterviewStatus(models.Model):
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "Interview status"
-        verbose_name_plural = "Interview statuses"
+        verbose_name = "Статус интервью"
+        verbose_name_plural = "Статусы интервью"
 
     def __str__(self) -> str:
         return self.title
@@ -101,8 +101,8 @@ class AnswerStatus(models.Model):
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "Answer status"
-        verbose_name_plural = "Answer statuses"
+        verbose_name = "Статус ответа"
+        verbose_name_plural = "Статусы ответов"
 
     def __str__(self) -> str:
         return self.title
@@ -147,8 +147,8 @@ class MessageRole(models.Model):
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "Message role"
-        verbose_name_plural = "Message roles"
+        verbose_name = "Роль сообщения"
+        verbose_name_plural = "Роль сообщений"
 
     def __str__(self) -> str:
         return self.title

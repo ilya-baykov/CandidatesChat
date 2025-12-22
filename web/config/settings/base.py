@@ -38,6 +38,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "apps.interviews",
+    "apps.reference"
 
     # "apps.common",
     # "apps.access",
@@ -45,7 +46,7 @@ LOCAL_APPS = [
     # "apps.ai",
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 # ---------------------------------------------------------------------
 # Middleware

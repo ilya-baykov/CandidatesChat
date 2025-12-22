@@ -1,7 +1,9 @@
 from django.db import models
 from django.utils import timezone
-from web.apps.interviews.models.interview import Interview
-from web.apps.reference.models.interview import MessageRole
+
+from .interview import Interview
+
+from ...reference.models import MessageRole
 
 
 class InterviewMessage(models.Model):
