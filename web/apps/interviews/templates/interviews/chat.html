@@ -1,19 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Интервью чат</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .chat-container { max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 10px; border-radius: 10px; }
-        .messages { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; }
-        .message { padding: 8px 12px; border-radius: 12px; max-width: 80%; word-wrap: break-word; }
-        .question { background-color: #f0f0f0; align-self: flex-start; }
-        .answer { background-color: #d0f0d0; align-self: flex-end; }
-        textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
-        button { margin-top: 5px; padding: 6px 12px; border-radius: 6px; border: none; background-color: #4CAF50; color: white; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        h2 { text-align: center; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .messages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-bottom: 10px;
+        }
+        .message {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .system {
+            background-color: #fff3cd;
+            color: #856404;
+            align-self: center;
+            font-style: italic;
+        }
+        .candidate {
+            background-color: #d0f0d0;
+            align-self: flex-end;
+        }
+        .agent {
+            background-color: #f0d0d0;
+            align-self: flex-start;
+        }
+        form {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            resize: vertical;
+            min-height: 80px;
+        }
+        button {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -22,39 +84,32 @@
     <h2>Интервью: {{ interview.candidate.full_name }}</h2>
 
     <div class="messages">
-        {# История answered вопросов #}
-        {% for q in interview.questions.all %}
-            {% if q.answer %}
-                <div class="message question">{{ q.question_text }}</div>
-                <div class="message answer">{{ q.answer.answer_text }}</div>
-            {% endif %}
+        {% for msg in messages %}
+            <div class="message {{ msg.role.code }}">
+                {{ msg.content }}
+            </div>
         {% endfor %}
-
-        {# Текущий вопрос (pending или repeat) #}
-        {% if current_question %}
-            <div class="message question">{{ current_question.question_text }}</div>
-        {% endif %}
     </div>
 
     {% if current_question %}
         <form method="post">
             {% csrf_token %}
             <input type="hidden" name="question_id" value="{{ current_question.id }}">
-            <textarea name="answer_text" required></textarea>
+            <textarea name="answer_text" required placeholder="Введите ваш ответ..."></textarea>
             <button type="submit">Отправить</button>
         </form>
     {% else %}
-        <p>Интервью завершено!</p>
+        <p style="text-align:center; font-weight:bold;">Интервью завершено!</p>
     {% endif %}
 </div>
 
-
 <script>
-    // Прокрутка истории сообщений вниз при загрузке страницы
+    // Автопрокрутка истории сообщений вниз
     const messagesDiv = document.querySelector('.messages');
     if (messagesDiv) {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 </script>
+
 </body>
 </html>
