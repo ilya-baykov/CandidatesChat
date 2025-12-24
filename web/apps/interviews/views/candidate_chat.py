@@ -78,6 +78,11 @@ class CandidateInterviewView(View):
         )
 
         current_question = flow.get_current_question()
+        if current_question:
+            MessageService.ensure_system_question_logged(
+                interview=interview,
+                question=current_question,
+            )
 
         context = self.build_context(interview=interview, current_question=current_question,
                                      validation_result=validation_result)
