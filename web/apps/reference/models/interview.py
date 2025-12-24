@@ -147,8 +147,8 @@ class MessageRole(models.Model):
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "Роль сообщения"
-        verbose_name_plural = "Роль сообщений"
+        verbose_name = "Роль отправителя сообщения"
+        verbose_name_plural = "Роли отправителей сообщений"
 
     def __str__(self) -> str:
         return self.title

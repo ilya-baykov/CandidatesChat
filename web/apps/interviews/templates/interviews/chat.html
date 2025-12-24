@@ -1,59 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Интервью чат</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .chat-container { max-width: 600px; margin: auto; border: 1px solid #ccc; padding: 10px; border-radius: 10px; }
-        .messages { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; }
-        .message { padding: 8px 12px; border-radius: 12px; max-width: 80%; word-wrap: break-word; }
-        .question { background-color: #f0f0f0; align-self: flex-start; }
-        .answer { background-color: #d0f0d0; align-self: flex-end; }
-        textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
-        button { margin-top: 5px; padding: 6px 12px; border-radius: 6px; border: none; background-color: #4CAF50; color: white; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        h2 { text-align: center; }
-    </style>
-</head>
-<body>
-<div class="chat-container">
-    <h2>Интервью: {{ interview.candidate.full_name }}</h2>
+<div class="interview-chat">
+    <h2>Интервью: {{ interview.candidate.full_name }} → {{ interview.vacancy.title }}</h2>
 
-    <div class="messages">
-        {# История answered вопросов #}
-        {% for q in interview.questions.all %}
-            {% if q.answer %}
-                <div class="message question">{{ q.question_text }}</div>
-                <div class="message answer">{{ q.answer.answer_text }}</div>
-            {% endif %}
+    <!-- Список сообщений -->
+    <div class="chat-messages">
+        {% for msg in messages %}
+            <div class="chat-message chat-message-{{ msg.role.code }}">
+                <strong>{{ msg.role.title }}:</strong>
+                <span>{{ msg.content|linebreaksbr }}</span>
+                <small class="message-time">{{ msg.created_at|date:"H:i:s" }}</small>
+            </div>
+        {% empty %}
+            <p>Пока нет сообщений...</p>
         {% endfor %}
-
-        {# Текущий вопрос (pending или repeat) #}
-        {% if current_question %}
-            <div class="message question">{{ current_question.question_text }}</div>
-        {% endif %}
     </div>
 
+    <!-- Текущий вопрос -->
     {% if current_question %}
+        <div class="current-question">
+            <p><strong>Вопрос {{ current_question.order }}:</strong> {{ current_question.question_text }}</p>
+        </div>
+
+        <!-- Форма ответа -->
         <form method="post">
             {% csrf_token %}
             <input type="hidden" name="question_id" value="{{ current_question.id }}">
-            <textarea name="answer_text" required></textarea>
+            <textarea name="answer_text" rows="4" placeholder="Введите ваш ответ..." required></textarea>
             <button type="submit">Отправить</button>
         </form>
     {% else %}
-        <p>Интервью завершено!</p>
+        <p>Интервью завершено. Спасибо за участие!</p>
+    {% endif %}
+
+    <!-- Результат последней проверки -->
+    {% if validation_result %}
+        {% if validation_result.is_correct %}
+            <div class="validation-result correct">
+                ✔ Ваш ответ принят. Переходим к следующему вопросу.
+            </div>
+        {% else %}
+            <div class="validation-result incorrect">
+                ✖ {{ validation_result.reply_message }}
+            </div>
+        {% endif %}
     {% endif %}
 </div>
 
+<style>
+.interview-chat { max-width: 700px; margin: 0 auto; font-family: sans-serif; }
+.chat-messages { border: 1px solid #ddd; padding: 10px; margin-bottom: 20px; max-height: 400px; overflow-y: auto; }
+.chat-message { margin-bottom: 8px; }
+.chat-message-candidate { color: #1a73e8; }
+.chat-message-agent { color: #34a853; }
+.chat-message-system { color: #fbbc05; font-style: italic; }
+.message-time { font-size: 0.75em; color: #888; margin-left: 5px; }
+.current-question { margin-bottom: 10px; }
+textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+button { padding: 8px 16px; }
+.validation-result.correct { color: green; margin-top: 10px; }
+.validation-result.incorrect { color: red; margin-top: 10px; }
+</style>
 
-<script>
-    // Прокрутка истории сообщений вниз при загрузке страницы
-    const messagesDiv = document.querySelector('.messages');
-    if (messagesDiv) {
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-</script>
-</body>
-</html>

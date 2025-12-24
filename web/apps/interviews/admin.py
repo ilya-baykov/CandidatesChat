@@ -3,7 +3,7 @@ from .models import (
     Candidate,
     Vacancy,
     Interview,
-    InterviewQuestion,
+    InterviewQuestion, InterviewMessage,
 )
 
 
@@ -18,8 +18,8 @@ class CandidateAdmin(admin.ModelAdmin):
 @admin.register(Vacancy)
 class VacancyAdmin(admin.ModelAdmin):
     """Админка для вакансий"""
-    list_display = ("title","vacancy_description", "external_id")
-    search_fields = ("title","vacancy_description", "external_id")
+    list_display = ("title", "vacancy_description", "external_id")
+    search_fields = ("title", "vacancy_description", "external_id")
     ordering = ("title",)
 
 
@@ -35,6 +35,21 @@ class InterviewQuestionInline(admin.TabularInline):
     readonly_fields = ()  # пока все поля редактируемы
 
 
+class InterviewMessageInline(admin.TabularInline):
+    """
+    Inline для просмотра истории сообщений интервью.
+    Только для чтения.
+    """
+    model = InterviewMessage
+    extra = 0
+    can_delete = False
+    readonly_fields = ("created_at", "role", "content")
+    ordering = ("created_at",)
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Interview)
 class InterviewAdmin(admin.ModelAdmin):
     """
@@ -46,5 +61,5 @@ class InterviewAdmin(admin.ModelAdmin):
     search_fields = ("candidate__full_name", "candidate__external_id", "vacancy__title")
     list_filter = ("status", "vacancy")
     readonly_fields = ("token_link", "started_at", "completed_at", "total_score")
-    inlines = [InterviewQuestionInline]
+    inlines = [InterviewQuestionInline, InterviewMessageInline]
     ordering = ("-started_at",)
