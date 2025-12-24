@@ -2,7 +2,7 @@ from django.utils import timezone
 
 from ..collections import InterviewCodes
 from ..models import Interview
-from ..services import QuestionService
+from ..services.questions import QuestionService
 from ...reference.models import InterviewStatus
 
 

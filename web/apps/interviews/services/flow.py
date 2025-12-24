@@ -1,6 +1,8 @@
-from . import QuestionService, AnswerService, InterviewService
 from .answer_validation.dto import AnswerValidationResult
 from .answer_validation.interfaces import AnswerValidator
+from .answers import AnswerService
+from .interviews import InterviewService
+from .questions import QuestionService
 from ..models import Interview, InterviewQuestion
 
 
@@ -12,7 +14,7 @@ class InterviewFlowService:
     - Завершает интервью при необходимости
     """
 
-    def __init__(self, interview: Interview, answer_validator: AnswerValidator | None = None):
+    def __init__(self, interview: Interview, answer_validator: AnswerValidator):
         self.interview = interview
         self.answer_validator = answer_validator
 
