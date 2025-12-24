@@ -13,7 +13,7 @@ class NeuralGatewayClient(ABC):
 
     BASE_URL = "https://ai.rt.ru/api/1.0"
 
-    TOKEN = os.getenv("TOKEN")
+    TOKEN = os.getenv("NEURAL_GATEWAY_TOKEN")
     HEADERS = {
         "Authorization": f"Bearer {TOKEN}",
         "Content-Type": "application/json",

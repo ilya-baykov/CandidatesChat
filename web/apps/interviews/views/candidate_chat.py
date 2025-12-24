@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
+from apps.interviews.services.answer_validation.ai import AIAnswerValidator
 from apps.interviews.services.answer_validation.fake import FakeAnswerValidator
 from apps.interviews.services.flow import InterviewFlowService
 
@@ -29,7 +30,8 @@ class CandidateInterviewView(View):
     def get(self, request):
         interview = self.get_interview()
         fake_validator = FakeAnswerValidator()
-        flow = InterviewFlowService(interview=interview,answer_validator=fake_validator)
+        ai_validator = AIAnswerValidator()
+        flow = InterviewFlowService(interview=interview, answer_validator=ai_validator)
         current_question = flow.get_current_question()
 
         context = {
@@ -41,7 +43,8 @@ class CandidateInterviewView(View):
     def post(self, request):
         interview = self.get_interview()
         fake_validator = FakeAnswerValidator()
-        flow = InterviewFlowService(interview=interview,answer_validator=fake_validator)
+        ai_validator = AIAnswerValidator()
+        flow = InterviewFlowService(interview=interview, answer_validator=ai_validator)
 
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text")
