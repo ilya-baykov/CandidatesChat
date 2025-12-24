@@ -45,9 +45,11 @@ class NeuralGatewayClient(ABC):
     def _create_request_data(self, prompt: str) -> dict:
         raise NotImplementedError
 
-    @abstractmethod
-    def _extract_text(self, response_data: dict | list) -> Optional[str]:
-        raise NotImplementedError
+    def _extract_text(self, response_data) -> Optional[str]:
+        try:
+            return response_data[0]["message"]["content"]
+        except Exception:
+            return None
 
 
 class ChatGPTClient(NeuralGatewayClient):
@@ -69,8 +71,28 @@ class ChatGPTClient(NeuralGatewayClient):
             }
         }
 
-    def _extract_text(self, response_data) -> Optional[str]:
-        try:
-            return response_data[0]["message"]["content"]
-        except Exception:
-            return None
+
+class YaGPT(NeuralGatewayClient):
+    MODEL = "yandexgpt-lite"
+    URL = f"{NeuralGatewayClient.BASE_URL}/ya/chat"
+
+    def _create_request_data(self, prompt: str) -> dict:
+        data = {
+            "chat": {
+                "model": self.MODEL,
+                "messages": [
+                    {
+                        "role": "user",
+                        "text": prompt
+                    }
+                ],
+                "completionOptions": {
+                    "temperature": self.TEMPERATURE
+                }
+            }
+        }
+        return data
+
+
+gpt_4_model = ChatGPTClient()
+yandex_lite_model = YaGPT()
