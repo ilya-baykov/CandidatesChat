@@ -11,7 +11,7 @@ class AnswerValidator(ABC):
 
     @abstractmethod
     def validate(self, *,
-                 question: InterviewQuestion, answer_text: str,
+                 question: InterviewQuestion, answer_text: str, vacancy_title: str, vacancy_description: str,
                  question_history: str | None = None) -> AnswerValidationResult:
         """
         Проверяет ответ кандидата и возвращает результат проверки.

@@ -25,21 +25,23 @@ class InterviewFlowService:
     def submit_answer(self, *, question: InterviewQuestion, answer_text: str,
                       question_history: str | None = None) -> AnswerValidationResult:
         """
-        1. Сохраняет ответ
-        2. Проверяет корректность через AnswerValidator
+        1. Проверяет корректность через AnswerValidator
+        2. Сохраняет ответ
         3. Применяет результат к flow
         4. Возвращает результат проверки (для UI)
         """
 
-        # 1. Сохраняем ответ кандидата
-        AnswerService.save(question=question, answer_text=answer_text)
-
-        # 2. Проверяем корректность ответа
+        # 1. Проверяем корректность ответа
         validation_result = self.answer_validator.validate(
+            vacancy_title=self.interview.vacancy.title,
+            vacancy_description=self.interview.vacancy.vacancy_description,
             question=question,
             answer_text=answer_text,
             question_history=question_history,
         )
+
+        # 2. Сохраняем ответ кандидата
+        AnswerService.save(question=question, answer_text=answer_text, score=validation_result.score)
 
         # 3. Управляем flow
         if validation_result.is_correct:

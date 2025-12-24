@@ -2,8 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
-from apps.interviews.services.answer_validation.ai import AIAnswerValidator
-from apps.interviews.services.answer_validation.fake import FakeAnswerValidator
+from apps.interviews.services.answer_validation.ai import AIAnswerValidator, ai_answer_validator
 from apps.interviews.services.flow import InterviewFlowService
 
 
@@ -25,13 +24,12 @@ class CandidateInterviewView(View):
         На MVP выбираем первое доступное интервью.
         Позже сюда будет фильтр по токену.
         """
-        return Interview.objects.first()
+        interview = Interview.objects.select_related('candidate', 'vacancy').first()
+        return interview
 
     def get(self, request):
         interview = self.get_interview()
-        fake_validator = FakeAnswerValidator()
-        ai_validator = AIAnswerValidator()
-        flow = InterviewFlowService(interview=interview, answer_validator=ai_validator)
+        flow = InterviewFlowService(interview=interview, answer_validator=ai_answer_validator)
         current_question = flow.get_current_question()
 
         context = {
@@ -42,16 +40,14 @@ class CandidateInterviewView(View):
 
     def post(self, request):
         interview = self.get_interview()
-        fake_validator = FakeAnswerValidator()
-        ai_validator = AIAnswerValidator()
-        flow = InterviewFlowService(interview=interview, answer_validator=ai_validator)
+        flow = InterviewFlowService(interview=interview, answer_validator=ai_answer_validator)
 
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text")
 
         question = get_object_or_404(InterviewQuestion, id=question_id)
 
-        validation_result = flow.submit_answer(question=question, answer_text=answer_text)
+        validation_result = flow.submit_answer(question=question, answer_text=answer_text, question_history=None)
 
         # Получаем следующий вопрос для отображения
         current_question = flow.get_current_question()
