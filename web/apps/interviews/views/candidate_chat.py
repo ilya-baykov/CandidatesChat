@@ -51,7 +51,7 @@ class CandidateInterviewView(View):
         is_correct = True
 
         # Отправляем ответ через flow
-        flow.submit_answer(question, answer_text, is_correct)
+        flow.submit_answer(question=question, answer_text=answer_text, is_correct=is_correct)
 
         # Получаем следующий вопрос для отображения
         current_question = flow.get_current_question()

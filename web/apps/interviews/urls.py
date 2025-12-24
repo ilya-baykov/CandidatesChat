@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CandidateInterviewView
+from apps.interviews.views.candidate_chat import CandidateInterviewView
 
 app_name = "interviews"
 
