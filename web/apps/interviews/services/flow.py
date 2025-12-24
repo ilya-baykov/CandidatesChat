@@ -1,4 +1,6 @@
 from . import QuestionService, AnswerService, InterviewService
+from .answer_validation.dto import AnswerValidationResult
+from .answer_validation.interfaces import AnswerValidator
 from ..models import Interview, InterviewQuestion
 
 
@@ -10,25 +12,40 @@ class InterviewFlowService:
     - Завершает интервью при необходимости
     """
 
-    def __init__(self, interview: Interview):
+    def __init__(self, interview: Interview, answer_validator: AnswerValidator | None = None):
         self.interview = interview
+        self.answer_validator = answer_validator
 
     def get_current_question(self) -> InterviewQuestion | None:
         """Возвращает текущий вопрос для отображения кандидату."""
         return QuestionService.get_current(self.interview)
 
     def submit_answer(self, *, question: InterviewQuestion, answer_text: str,
-                      is_correct: bool) -> InterviewQuestion | None:
+                      question_history: str | None = None) -> AnswerValidationResult:
         """
-        Сохраняет ответ и управляет статусом вопроса.
+        1. Сохраняет ответ
+        2. Проверяет корректность через AnswerValidator
+        3. Применяет результат к flow
+        4. Возвращает результат проверки (для UI)
         """
+
+        # 1. Сохраняем ответ кандидата
         AnswerService.save(question=question, answer_text=answer_text)
 
-        if is_correct:
+        # 2. Проверяем корректность ответа
+        validation_result = self.answer_validator.validate(
+            question=question,
+            answer_text=answer_text,
+            question_history=question_history,
+        )
+
+        # 3. Управляем flow
+        if validation_result.is_correct:
             QuestionService.mark_answered(question)
         else:
             QuestionService.mark_repeat(question)
 
+        # 4. Проверяем завершение интервью
         InterviewService.complete_if_done(self.interview)
 
-        return self.get_current_question()
+        return validation_result

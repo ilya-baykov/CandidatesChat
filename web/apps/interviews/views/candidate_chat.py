@@ -45,13 +45,7 @@ class CandidateInterviewView(View):
 
         question = get_object_or_404(InterviewQuestion, id=question_id)
 
-        # ===== MVP: эмуляция проверки ответа =====
-        # Пока ИИ нет — мы сами решаем, корректный ли ответ
-        # Для теста можно менять на False, чтобы проверить повтор вопроса
-        is_correct = True
-
-        # Отправляем ответ через flow
-        flow.submit_answer(question=question, answer_text=answer_text, is_correct=is_correct)
+        validation_result = flow.submit_answer(question=question, answer_text=answer_text)
 
         # Получаем следующий вопрос для отображения
         current_question = flow.get_current_question()
@@ -59,5 +53,6 @@ class CandidateInterviewView(View):
         context = {
             "interview": interview,
             "current_question": current_question,
+            "validation_result": validation_result,
         }
         return render(request, self.template_name, context)
