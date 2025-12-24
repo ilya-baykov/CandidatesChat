@@ -18,8 +18,8 @@ class CandidateAdmin(admin.ModelAdmin):
 @admin.register(Vacancy)
 class VacancyAdmin(admin.ModelAdmin):
     """Админка для вакансий"""
-    list_display = ("title", "external_id")
-    search_fields = ("title", "external_id")
+    list_display = ("title","vacancy_description", "external_id")
+    search_fields = ("title","vacancy_description", "external_id")
     ordering = ("title",)
 
 
