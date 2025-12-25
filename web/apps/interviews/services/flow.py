@@ -1,6 +1,7 @@
 from .answer_validation.dto import AnswerValidationResult
 from .answer_validation.interfaces import AnswerValidator
 from .answers import AnswerService
+from .constants import INTERVIEW_SAVED_MESSAGE
 from .interviews import InterviewService
 from .message_service import MessageService
 from .questions import QuestionService
@@ -83,7 +84,7 @@ class InterviewFlowService:
             MessageService.add_message(
                 interview=self.interview,
                 role_code="system",
-                content="Спасибо за прохождение интервью! Ваши ответы сохранены, мы свяжемся с вами позже."
+                content=INTERVIEW_SAVED_MESSAGE
             )
 
         return validation_result
