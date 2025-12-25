@@ -1,115 +1,50 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Интервью чат</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 20px;
-        }
-        .chat-container {
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            padding: 20px;
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .messages {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-bottom: 10px;
-        }
-        .message {
-            padding: 10px 15px;
-            border-radius: 15px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-        .system {
-            background-color: #fff3cd;
-            color: #856404;
-            align-self: center;
-            font-style: italic;
-        }
-        .candidate {
-            background-color: #d0f0d0;
-            align-self: flex-end;
-        }
-        .agent {
-            background-color: #f0d0d0;
-            align-self: flex-start;
-        }
-        form {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            resize: vertical;
-            min-height: 80px;
-        }
-        button {
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            background-color: #4CAF50;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body>
+{% extends "core/base.html" %}
+{% load static %}
 
-<div class="chat-container">
-    <h2>Интервью: {{ interview.candidate.full_name }}</h2>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'interviews/css/chat.css' %}">
+{% endblock %}
 
-    <div class="messages">
+{% block content %}
+<div class="chat-wrapper">
+    <header class="chat-header">
+        <div class="chat-header__title">
+            Интервью
+        </div>
+        <div class="chat-header__subtitle">
+            {{ interview.candidate.full_name }}
+        </div>
+    </header>
+
+    <div class="chat-messages" id="messages">
         {% for msg in messages %}
-            <div class="message {{ msg.role.code }}">
-                {{ msg.content }}
+            <div class="message-row {{ msg.role.code }}">
+                <div class="message-bubble">
+                    {{ msg.content }}
+                </div>
             </div>
         {% endfor %}
     </div>
 
     {% if current_question %}
-        <form method="post">
+        <form method="post" class="chat-input">
             {% csrf_token %}
             <input type="hidden" name="question_id" value="{{ current_question.id }}">
-            <textarea name="answer_text" required placeholder="Введите ваш ответ..."></textarea>
+            <textarea
+                name="answer_text"
+                placeholder="Введите ваш ответ…"
+                required
+            ></textarea>
             <button type="submit">Отправить</button>
         </form>
     {% else %}
-        <p style="text-align:center; font-weight:bold;">Интервью завершено!</p>
+        <div class="chat-finished">
+            Интервью завершено 🎉
+        </div>
     {% endif %}
 </div>
+{% endblock %}
 
-<script>
-    // Автопрокрутка истории сообщений вниз
-    const messagesDiv = document.querySelector('.messages');
-    if (messagesDiv) {
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-</script>
-
-</body>
-</html>
+{% block extra_js %}
+<script src="{% static 'interviews/js/chat.js' %}"></script>
+{% endblock %}
