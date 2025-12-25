@@ -76,6 +76,14 @@ class InterviewFlowService:
         else:
             QuestionService.mark_repeat(question)
 
-        InterviewService.complete_if_done(self.interview)
+        # Проверяем завершение интервью
+        interview_completed = InterviewService.complete_if_done(self.interview)
+
+        if interview_completed:
+            MessageService.add_message(
+                interview=self.interview,
+                role_code="system",
+                content="Спасибо за прохождение интервью! Ваши ответы сохранены, мы свяжемся с вами позже."
+            )
 
         return validation_result
