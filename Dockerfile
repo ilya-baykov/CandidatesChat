@@ -1,61 +1,33 @@
-# Используем официальный Python
-FROM python:3.11-slim
+# Выбираем базоый образ
+FROM python:3.11.14-slim
 
-# ------------------------------
-# System settings
-# ------------------------------
+# Создаем отдельного пользователя для работы внутри контейнера
+RUN groupadd -r groupdocker && useradd -r -g groupdocker userdocker
+
+# Переменные окружения по умолчанию
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# ------------------------------
-# Workdir
-# ------------------------------
+# Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
 
-# ------------------------------
-# System dependencies
-# ------------------------------
-RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    libpq-dev \
-    build-essential \
-    curl \
-    ca-certificates \
-    netcat-openbsd \
-    && rm -rf /var/lib/apt/lists/*
 
-# ------------------------------
-# Устанавливаем Poetry
-# ------------------------------
-RUN pip install --no-cache-dir poetry
+# Копируем файл с зависимостями в контейнер
+COPY requirements.txt .
 
-# ------------------------------
-# Копируем файлы проекта
-# ------------------------------
-# Сначала копируем только файлы зависимостей
-COPY pyproject.toml poetry.lock* ./
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Устанавливаем зависимости (без создания виртуального окружения)
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root
 
-# ------------------------------
-# Копируем остальной код
-# ------------------------------
-COPY . .
+# Копируем исходный код приложения в контейнер ( предполагается, что код находится в папке web, можно просто COPY . . )
+# Не забывать про файл .dockerignore чтобы не копировать лишние файлы
+COPY web/ ./web/
 
-# ------------------------------
-# Создаем необходимые директории
-# ------------------------------
+
 RUN mkdir -p web/staticfiles web/media
 
-# ------------------------------
-# Рабочая директория для web
-# ------------------------------
-WORKDIR /app/web
+EXPOSE 8000
 
-# ------------------------------
-# Default command
-# ------------------------------
+USER userdocker
+
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
