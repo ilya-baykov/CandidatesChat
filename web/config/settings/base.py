@@ -35,16 +35,20 @@ THIRD_PARTY_APPS = [
     # "django_celery_beat",
     "corsheaders",
 ]
-
 LOCAL_APPS = [
     "apps.interviews",
     "apps.reference"
-
-    # "apps.common",
-    # "apps.access",
-    # "apps.chats",
-    # "apps.ai",
 ]
+
+# LOCAL_APPS = [
+#     "apps.interviews",
+#     "apps.reference"
+#
+#     # "apps.common",
+#     # "apps.access",
+#     # "apps.chats",
+#     # "apps.ai",
+# ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -69,7 +73,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR  / "core" / "templates"],
+        "DIRS": [BASE_DIR / "core" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -93,12 +97,12 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": "localhost",  # Всегда localhost
-        "PORT": "5432",
         # "HOST": os.getenv("POSTGRES_HOST", "db"),
-        # "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "HOST": os.getenv("POSTGRES_HOST", "db"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
+
 
 # ---------------------------------------------------------------------
 # Password validation

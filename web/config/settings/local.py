@@ -9,4 +9,3 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-# Можно включить Django Debug Toolbar позже

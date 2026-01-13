@@ -13,21 +13,28 @@ WORKDIR /app
 
 
 # Копируем файл с зависимостями в контейнер
-COPY requirements.txt .
+COPY requirements.txt /app/requirements.txt
 
 # Устанавливаем зависимости
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
 
 
 # Копируем исходный код приложения в контейнер ( предполагается, что код находится в папке web, можно просто COPY . . )
 # Не забывать про файл .dockerignore чтобы не копировать лишние файлы
-COPY web/ ./web/
+COPY web/ ./web
 
 
-RUN mkdir -p web/staticfiles web/media
 
-EXPOSE 8000
+RUN mkdir -p staticfiles media
+
+EXPOSE 82
+
 
 USER userdocker
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

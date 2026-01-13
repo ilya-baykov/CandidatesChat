@@ -3,7 +3,7 @@ from apps.interviews.models import InterviewQuestion
 from .interfaces import AnswerValidator
 from .dto import AnswerValidationResult
 
-from apps.interviews.ai.clients import NeuralGatewayClient, yandex_lite_model
+from apps.interviews.ai.clients import NeuralGatewayClient, yandex_lite_model, gpt_4_model
 from apps.interviews.ai.prompts import PromptGenerator
 from apps.interviews.ai.json_extractor import JsonExtractor
 
@@ -46,4 +46,4 @@ class AIAnswerValidator(AnswerValidator):
         return result
 
 
-ai_answer_validator = AIAnswerValidator(client=yandex_lite_model, max_attempts=3)
+ai_answer_validator = AIAnswerValidator(client=gpt_4_model, max_attempts=3)
