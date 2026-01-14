@@ -74,7 +74,6 @@ class CandidateInterviewView(View):
         validation_result = flow.submit_answer(
             question=question,
             answer_text=answer_text,
-            question_history=None,  # подключим позже
         )
 
         current_question = flow.get_current_question()

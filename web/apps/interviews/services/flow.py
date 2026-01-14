@@ -5,7 +5,8 @@ from .constants import INTERVIEW_SAVED_MESSAGE
 from .interviews import InterviewService
 from .message_service import MessageService
 from .questions import QuestionService
-from ..models import Interview, InterviewQuestion, InterviewMessage
+from ..collections import AnswerCodes
+from ..models import Interview, InterviewQuestion
 
 
 class InterviewFlowService:
@@ -25,8 +26,7 @@ class InterviewFlowService:
         question = QuestionService.get_current(self.interview)
         return question
 
-    def submit_answer(self, *, question: InterviewQuestion, answer_text: str,
-                      question_history: str | None = None) -> AnswerValidationResult:
+    def submit_answer(self, *, question: InterviewQuestion, answer_text: str) -> AnswerValidationResult:
         """
         1. Сохраняет сообщение кандитата (для истории чата)
         2. Проверят корректность ответа пользователя
@@ -42,9 +42,11 @@ class InterviewFlowService:
             role_code="candidate",
             content=answer_text,
         )
+        # Обновляем статус вопроса (получен ответ, но пока не оценен)
+        QuestionService.mark_status(question=question, code=AnswerCodes.ANSWERED)
 
-        if question_history is None:
-            question_history = MessageService.build_question_history(interview=self.interview, question=question)
+        # Формируем историю диалога
+        question_history = MessageService.build_question_history(interview=self.interview, question=question)
 
         # 2 Валидация
         validation_result = self.answer_validator.validate(
@@ -73,9 +75,9 @@ class InterviewFlowService:
 
         # 5 Flow
         if validation_result.is_correct:
-            QuestionService.mark_answered(question)
+            QuestionService.mark_status(question=question, code=AnswerCodes.SCORED)
         else:
-            QuestionService.mark_repeat(question)
+            QuestionService.mark_status(question=question, code=AnswerCodes.REPEAT)
 
         # Проверяем завершение интервью
         interview_completed = InterviewService.complete_if_done(self.interview)
