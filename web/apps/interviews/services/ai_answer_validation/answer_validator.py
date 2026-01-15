@@ -1,11 +1,25 @@
+from abc import ABC, abstractmethod
+
 from apps.interviews.models import InterviewQuestion
+from apps.interviews.services.ai_answer_validation.dto import AnswerValidationResult
+from apps.interviews.services.ai_answer_validation.prompts import PromptGenerator
+from core.ai_service.clients import NeuralGatewayClient, gpt_4_model
+from core.utilities.json_extractor import JsonExtractor
 
-from .interfaces import AnswerValidator
-from .dto import AnswerValidationResult
 
-from apps.interviews.ai.clients import NeuralGatewayClient, yandex_lite_model, gpt_4_model
-from apps.interviews.ai.prompts import PromptGenerator
-from apps.interviews.ai.json_extractor import JsonExtractor
+class AnswerValidator(ABC):
+    """
+    Интерфейс сервиса проверки ответа кандидата.
+    """
+
+    @abstractmethod
+    def validate(self, *,
+                 question: InterviewQuestion, answer_text: str, vacancy_title: str, vacancy_description: str,
+                 question_history: str | None = None) -> AnswerValidationResult:
+        """
+        Проверяет ответ кандидата и возвращает результат проверки.
+        """
+        raise NotImplementedError
 
 
 class AIAnswerValidator(AnswerValidator):
@@ -43,6 +57,21 @@ class AIAnswerValidator(AnswerValidator):
                                         is_correct=False,
                                         reply_message="Пожалуйста, уточните или переформулируйте ответ.",
                                         justification="Ошибка запроса к ИИ-агенту")
+        return result
+
+
+class FakeAnswerValidator(AnswerValidator):
+    """
+    MVP-валидатор:
+    всегда считает ответ корректным.
+    """
+
+    def validate(self, *,
+                 question: InterviewQuestion,
+                 answer_text: str,
+                 vacancy_title: str, vacancy_description: str,
+                 question_history: str | None = None) -> AnswerValidationResult:
+        result = AnswerValidationResult(is_correct=True, reply_message=None)
         return result
 
 

@@ -3,7 +3,6 @@ from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
 from apps.interviews.services.flow import InterviewFlowService
-from apps.interviews.services.answer_validation.ai import ai_answer_validator
 from apps.interviews.services.message_service import MessageService
 
 
@@ -47,7 +46,7 @@ class CandidateInterviewView(View):
     def get(self, request):
         interview = self.get_interview()
 
-        flow = InterviewFlowService(interview=interview, answer_validator=ai_answer_validator)
+        flow = InterviewFlowService(interview=interview)
 
         current_question = flow.get_current_question()
 
@@ -64,7 +63,7 @@ class CandidateInterviewView(View):
     def post(self, request):
         interview = self.get_interview()
 
-        flow = InterviewFlowService(interview=interview, answer_validator=ai_answer_validator)
+        flow = InterviewFlowService(interview=interview)
 
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text", "").strip()

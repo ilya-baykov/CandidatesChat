@@ -5,6 +5,7 @@ from enum import Enum
 class AnswerCodes(Enum):
     PENDING = "pending"
     ANSWERED = "answered"
+    VALIDATING = "validating"
     SCORED = "scored"
     REPEAT = "repeat"
 
@@ -18,6 +19,7 @@ class InterviewCodes:
 # Литералы для простого использования
 AnswerCodeLiteral: TypeAlias = Literal[
     AnswerCodes.PENDING,
+    AnswerCodes.VALIDATING,
     AnswerCodes.ANSWERED,
     AnswerCodes.SCORED,
     AnswerCodes.REPEAT,
