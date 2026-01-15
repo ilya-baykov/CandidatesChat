@@ -1,4 +1,4 @@
-from .ai_answer_validation.answer_validator import AnswerValidator, AIAnswerValidator, ai_answer_validator
+from .ai_answer_validation.answer_validator import ai_answer_validator
 from .ai_answer_validation.dto import AnswerValidationResult
 from .answers import AnswerService
 from .constants import INTERVIEW_SAVED_MESSAGE
@@ -11,84 +11,116 @@ from ..models import Interview, InterviewQuestion
 
 class InterviewFlowService:
     """
-    Оркестратор flow интервью:
-    - Сохраняет ответы кандидата
-    - Меняет статус вопросов (answered/repeat)
-    - Завершает интервью при необходимости
+    Оркестратор flow интервью (Application Layer):
+
+    Отвечает за:
+    - приём и обработку ответов кандидата
+    - запуск AI-валидации
+    - изменение статусов вопросов
+    - логирование сообщений (candidate / agent / system)
+    - завершение интервью
+    - формирование UI-ready состояния
     """
 
+    # Конфигурационные зависимости (можно подменять)
     AI_ANSWER_VALIDATOR = ai_answer_validator
+
+    # Рабочие сервисы (dependencies)
+    message_service = MessageService
+    question_service = QuestionService
+    answer_service = AnswerService
+    interview_service = InterviewService
 
     def __init__(self, interview: Interview):
         self.interview = interview
 
-    def get_current_question(self) -> InterviewQuestion | None:
-        """Возвращает текущий вопрос для отображения кандидату."""
-        question = QuestionService.get_current(self.interview)
-        return question
+    def get_state_for_display(self) -> dict:
+        """
+        Возвращает состояние интервью, готовое для отображения в UI:
+        - текущий вопрос
+        - сообщения
+        Гарантирует, что system-вопрос залогирован ровно один раз.
+        """
+        question = self.question_service.get_current(self.interview)
+
+        if question:
+            self.message_service.ensure_system_question_logged(
+                interview=self.interview,
+                question=question,
+            )
+        messages = self.interview.messages.select_related("role").order_by("created_at"),  # noqa
+        contex = {"current_question": question, "messages": messages}
+        return contex
 
     def submit_answer(self, *, question: InterviewQuestion, answer_text: str) -> AnswerValidationResult:
-        # Принимаем ответ от пользователя
+        """
+        Основной use-case:
+        - принимает ответ кандидата
+        - запускает AI-валидацию
+        - применяет результат
+        - при необходимости завершает интервью
+        """
+
+        # 1. Принимаем ответ (быстро и синхронно)
         self._accept_answer(question=question, answer_text=answer_text)
 
-        # Формируем историю вопроса
-        history = MessageService.build_question_history(interview=self.interview, question=question)
-        result = self._run_ai_validation(question=question, answer_text=answer_text, question_history=history)
+        # 2. Формируем историю вопроса
+        history = self.message_service.build_question_history(interview=self.interview, question=question)
 
-        # Применяем результат валидации
-        self._apply_validation_result(question=question, answer_text=answer_text, validation_result=result)
+        # 3. Запускаем AI-валидацию
+        validation_result = self._run_ai_validation(question=question, answer_text=answer_text,
+                                                    question_history=history)
 
-        # Проверяем завершенность интервью
+        # 4. Применяем результат
+        self._apply_validation_result(question=question, answer_text=answer_text, validation_result=validation_result)
+
+        # 5. Проверяем завершение интервью
         self._advance_interview_if_needed()
 
-        return result
+        return validation_result
 
     def _accept_answer(self, *, question: InterviewQuestion, answer_text: str) -> None:
         """
-        Быстрый синхронный шаг:
-        - сохраняем ответ кандидата
-        - помечаем вопрос как 'validating'
+        Синхронный шаг:
+        - сохраняем сообщение кандидата
+        - помечаем вопрос как validating
         """
+        self.message_service.add_message(interview=self.interview, question=question,
+                                         role_code="candidate", content=answer_text, )
 
-        MessageService.add_message(
-            interview=self.interview,
-            question=question,
-            role_code="candidate",
-            content=answer_text,
-        )
-
-        QuestionService.mark_status(
-            question=question,
-            code=AnswerCodes.VALIDATING,
-        )
+        self.question_service.mark_status(question=question, code=AnswerCodes.VALIDATING)
 
     def _run_ai_validation(self, *, question: InterviewQuestion, answer_text: str,
-                          question_history: str) -> AnswerValidationResult:
-        validate_result = self.AI_ANSWER_VALIDATOR.validate(
+                           question_history: str) -> AnswerValidationResult:
+        """
+        Запуск AI-валидации ответа.
+        """
+        validation_result = self.AI_ANSWER_VALIDATOR.validate(
             vacancy_title=self.interview.vacancy.title,
             vacancy_description=self.interview.vacancy.vacancy_description,
             question=question,
             answer_text=answer_text,
             question_history=question_history,
         )
-
-        return validate_result
+        return validation_result
 
     def _apply_validation_result(self, *, question: InterviewQuestion, answer_text: str,
-                                validation_result: AnswerValidationResult) -> None:
+                                 validation_result: AnswerValidationResult) -> None:
+        """
+        Применяет результат AI-валидации:
+        - сообщение агента (если есть)
+        - сохранение ответа
+        - смена статуса вопроса
+        """
         if validation_result.reply_message:
-            MessageService.add_message(
+            self.message_service.add_message(
                 interview=self.interview,
                 question=question,
                 role_code="agent",
                 content=validation_result.reply_message,
             )
 
-        AnswerService.save(
-            question=question,
-            answer_text=answer_text,
-            score=validation_result.score,
-        )
+        self.answer_service.save(question=question, answer_text=answer_text, score=validation_result.score)
 
         next_status = (
             AnswerCodes.SCORED
@@ -96,15 +128,20 @@ class InterviewFlowService:
             else AnswerCodes.REPEAT
         )
 
-        QuestionService.mark_status(question, next_status)
+        self.question_service.mark_status(
+            question=question,
+            code=next_status,
+        )
 
     def _advance_interview_if_needed(self) -> None:
-        interview_completed = InterviewService.complete_if_done(self.interview)
+        """
+        Завершает интервью, если больше нет активных вопросов.
+        """
+        interview_completed = self.interview_service.complete_if_done(self.interview)
 
         if interview_completed:
-            MessageService.add_message(
+            self.message_service.add_message(
                 interview=self.interview,
                 role_code="system",
                 content=INTERVIEW_SAVED_MESSAGE,
             )
-

@@ -1,22 +1,19 @@
-from django.shortcuts import render, get_object_or_404
+from apps.interviews.services.flow import InterviewFlowService
+
+from django.shortcuts import get_object_or_404, render
 from django.views import View
 
-from apps.interviews.models import Interview, InterviewQuestion
-from apps.interviews.services.flow import InterviewFlowService
-from apps.interviews.services.message_service import MessageService
+from ..models import Interview, InterviewQuestion
 
 
 class CandidateInterviewView(View):
     """
     MVP-View для чата кандидата.
 
-    Flow:
-    1. Показываем текущий вопрос (pending или repeat)
-    2. Сохраняем сообщение кандидата
-    3. Валидируем ответ через ИИ
-    4. Сохраняем сообщение ИИ (если есть)
-    5. Меняем статус вопроса
-    6. Показываем следующий вопрос или завершаем интервью
+    View:
+    - ничего не решает
+    - ничего не оркестрирует
+    - просто делегирует Flow
     """
 
     template_name = "interviews/chat.html"
@@ -27,62 +24,36 @@ class CandidateInterviewView(View):
         MVP-реализация.
         Позже будет поиск по token_link.
         """
-        interview = (Interview.objects
-                     .select_related("candidate", "vacancy", "status")
-                     .prefetch_related("messages__role"))
-        return interview.first()
-
-    @staticmethod
-    def build_context(*, interview: Interview, current_question: InterviewQuestion | None,
-                      validation_result=None) -> dict:
-        context = {
-            "interview": interview,
-            "messages": interview.messages.select_related("role").order_by("created_at"),  # noqa
-            "current_question": current_question,
-            "validation_result": validation_result
-        }
-        return context
+        interview = (
+            Interview.objects
+            .select_related("candidate", "vacancy", "status")
+            .prefetch_related("messages__role")
+            .first()
+        )
+        return interview
 
     def get(self, request):
         interview = self.get_interview()
-
         flow = InterviewFlowService(interview=interview)
 
-        current_question = flow.get_current_question()
-
-        if current_question:
-            MessageService.ensure_system_question_logged(
-                interview=interview,
-                question=current_question,
-            )
-
-        context = self.build_context(interview=interview, current_question=current_question)
-
+        state = flow.get_state_for_display()
+        context = {"interview": interview, **state}
         return render(request, self.template_name, context)
 
     def post(self, request):
         interview = self.get_interview()
-
         flow = InterviewFlowService(interview=interview)
 
-        question_id = request.POST.get("question_id")
+        question = get_object_or_404(InterviewQuestion, id=request.POST.get("question_id"), interview=interview)
+
         answer_text = request.POST.get("answer_text", "").strip()
 
-        question = get_object_or_404(InterviewQuestion, id=question_id, interview=interview)
+        validation_result = flow.submit_answer(question=question, answer_text=answer_text)
 
-        validation_result = flow.submit_answer(
-            question=question,
-            answer_text=answer_text,
-        )
-
-        current_question = flow.get_current_question()
-        if current_question:
-            MessageService.ensure_system_question_logged(
-                interview=interview,
-                question=current_question,
-            )
-
-        context = self.build_context(interview=interview, current_question=current_question,
-                                     validation_result=validation_result)
-
+        state = flow.get_state_for_display()
+        context = {
+            "interview": interview,
+            "validation_result": validation_result,
+            **state,
+        }
         return render(request, self.template_name, context)
