@@ -38,6 +38,7 @@ class CandidateInterviewView(View):
 
         state = flow.get_state_for_display()
         context = {"interview": interview, **state}
+        print(context)
         return render(request, self.template_name, context)
 
     def post(self, request):
@@ -56,4 +57,5 @@ class CandidateInterviewView(View):
             "validation_result": validation_result,
             **state,
         }
+        print(context)
         return render(request, self.template_name, context)

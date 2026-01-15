@@ -44,11 +44,9 @@ class InterviewFlowService:
         question = self.question_service.get_current(self.interview)
 
         if question:
-            self.message_service.ensure_system_question_logged(
-                interview=self.interview,
-                question=question,
-            )
-        messages = self.interview.messages.select_related("role").order_by("created_at"),  # noqa
+            self.message_service.ensure_system_question_logged(interview=self.interview, question=question)
+
+        messages = self.interview.messages.select_related("role").order_by("created_at")  # noqa
         contex = {"current_question": question, "messages": messages}
         return contex
 
