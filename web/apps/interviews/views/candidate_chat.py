@@ -1,9 +1,9 @@
-from apps.interviews.services.flow import InterviewFlowService
 
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
 from ..models import Interview, InterviewQuestion
+from ..services.flow import InterviewFlowService
 
 
 class CandidateInterviewView(View):
