@@ -9,7 +9,7 @@ services:
   #      db:
   #        condition: service_healthy
   #    env_file:
-  #        - .env
+  #        - .env.OLD
   #    entrypoint: ["/app/entrypoint.sh"]
   #    command: python /app/web/manage.py runserver 0.0.0.0:82
 
@@ -17,11 +17,11 @@ services:
     image: postgres:15
     container_name: chat_db
     env_file:
-      - .env
+      - .env.docker
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"]
       interval: 5s
       timeout: 5s
       retries: 10          # больше попыток — надёжнее при первом запуске
@@ -64,9 +64,10 @@ services:
       - redis
       - db
     env_file:
-      - .env
+      - .env.docker
     environment:
       PYTHONPATH: /app/web
+      REDIS_URL: redis://redis:6379/0
     command: celery -A web.config worker -l info
 
 

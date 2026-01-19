@@ -11,16 +11,16 @@ from .services.answer_processing import InterviewAnswerProcessingService
     retry_kwargs={"max_retries": 3, "countdown": 10},
 )
 def run_ai_validation_task(
-    self,
-    *,
-    interview_id: int,
-    question_id: int,
-    answer_text: str,
+        self,
+        *,
+        interview_id: int,
+        question_id: int,
+        answer_text: str,
 ) -> None:
     """
     Celery-task — транспорт для async use-case.
     """
-
+    print("Celery-task была взята в работу")
     interview = (
         Interview.objects
         .select_related("vacancy")

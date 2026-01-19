@@ -17,7 +17,7 @@ class QuestionService:
     @staticmethod
     def get_current(interview: Interview) -> InterviewQuestion | None:
         """Возвращает текущий вопрос для отображения: pending или repeat."""
-        codes_values = [AnswerCodes.PENDING.value, AnswerCodes.REPEAT.value]
+        codes_values = [AnswerCodes.PENDING.value, AnswerCodes.REPEAT.value,AnswerCodes.VALIDATING.value]
         questions = interview.questions.filter(status__code__in=codes_values)  # noqa
         question = questions.order_by('order').first()
         return question

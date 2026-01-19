@@ -1,6 +1,6 @@
 import os
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", os.getenv("DJANGO_SETTINGS_MODULE"))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.config.settings.base")
 
 from celery import Celery
 
@@ -15,6 +15,6 @@ app.autodiscover_tasks()
 
 
 # Опционально: настройка для обработки задач
-@app.task(bind=True, ignore_result=True)
+@app.task(bind=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')

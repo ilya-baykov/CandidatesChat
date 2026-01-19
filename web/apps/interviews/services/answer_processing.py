@@ -46,7 +46,7 @@ class InterviewAnswerProcessingService:
             answer_text=answer_text,
             question_history=history,
         )
-
+        print(validation_result)
         self._apply_validation_result(
             question=question,
             answer_text=answer_text,
@@ -60,11 +60,11 @@ class InterviewAnswerProcessingService:
     # ------------------------------------------------------------------
 
     def _apply_validation_result(
-        self,
-        *,
-        question: InterviewQuestion,
-        answer_text: str,
-        validation_result,
+            self,
+            *,
+            question: InterviewQuestion,
+            answer_text: str,
+            validation_result,
     ) -> None:
         """
         Применяет результат AI-валидации.

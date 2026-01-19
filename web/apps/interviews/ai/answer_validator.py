@@ -1,6 +1,6 @@
 from apps.interviews.models import InterviewQuestion, Interview
-from apps.interviews.services.answer_validation.ai import ai_answer_validator
-from apps.interviews.services.answer_validation.dto import AnswerValidationResult
+from apps.interviews.services.ai_answer_validation.answer_validator import ai_answer_validator
+from apps.interviews.services.ai_answer_validation.dto import AnswerValidationResult
 
 
 class AnswerAiValidator:

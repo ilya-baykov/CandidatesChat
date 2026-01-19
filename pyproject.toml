@@ -19,10 +19,16 @@ dependencies = [
     "django-redis (>=6.0.0,<7.0.0)",
     "django-celery-results (>=2.6.0,<3.0.0)",
     "gunicorn (>=23.0.0,<24.0.0)",
-    "requests (>=2.32.5,<3.0.0)"
+    "requests (>=2.32.5,<3.0.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "pytest-django (>=4.11.1,<5.0.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.base"
+pythonpath = ["web"]

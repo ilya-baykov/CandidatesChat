@@ -3,6 +3,7 @@ from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
 from apps.interviews.services.flow import InterviewFlowService
+from apps.interviews.tasks import run_ai_validation_task
 
 
 class CandidateInterviewView(View):
@@ -41,7 +42,7 @@ class CandidateInterviewView(View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request, run_ai_validation_task=None):
+    def post(self, request, run_ai_validation_task=run_ai_validation_task):
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text", "").strip()
 

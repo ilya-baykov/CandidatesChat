@@ -37,9 +37,12 @@ class InterviewFlowService:
             .select_related("role")
             .order_by("created_at")
         )
+
         context = {
             "current_question": question,
             "messages": messages,
+            "is_processing": question and question.status.code == AnswerCodes.VALIDATING.value,
+            "needs_repeat": question and question.status.code == AnswerCodes.REPEAT.value,
         }
 
         return context

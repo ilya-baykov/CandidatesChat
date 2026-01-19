@@ -3,19 +3,23 @@ import os
 
 from dotenv import load_dotenv
 
-# Загружаем .env файл
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# Загружаем .env.local
+load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
 
 # ---------------------------------------------------------------------
 # Core
 # ---------------------------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-secret-key")
 
-DEBUG = False
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
 
-ALLOWED_HOSTS: list[str] = []
+# Для локальной отладки
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # ---------------------------------------------------------------------
 # Applications
@@ -39,16 +43,6 @@ LOCAL_APPS = [
     "apps.interviews",
     "apps.reference"
 ]
-
-# LOCAL_APPS = [
-#     "apps.interviews",
-#     "apps.reference"
-#
-#     # "apps.common",
-#     # "apps.access",
-#     # "apps.chats",
-#     # "apps.ai",
-# ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -97,13 +91,11 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB"),
         "USER": os.getenv("POSTGRES_USER"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        # "HOST": os.getenv("POSTGRES_HOST", "db"),
-        "HOST": "localhost",
-        "PORT": os.getenv("POSTGRES_PORT", "5433"),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
-
-
+print(DATABASES)
 # ---------------------------------------------------------------------
 # Password validation
 # ---------------------------------------------------------------------
@@ -147,7 +139,7 @@ REST_FRAMEWORK = {
 # ---------------------------------------------------------------------
 # Redis
 # ---------------------------------------------------------------------
-REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/0")
 
 # ---------------------------------------------------------------------
 # Celery (подключено, но не используем)
