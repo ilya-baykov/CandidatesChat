@@ -1,17 +1,17 @@
 services:
-#  web:
-#    build: .
-#    image: chat_web
-#    container_name: chat_web
-#    ports:
-#      - "8000:82"          # хост:контейнер
-#    depends_on:
-#      db:
-#        condition: service_healthy
-#    env_file:
-#        - .env
-#    entrypoint: ["/app/entrypoint.sh"]
-#    command: python /app/web/manage.py runserver 0.0.0.0:82
+  #  web:
+  #    build: .
+  #    image: chat_web
+  #    container_name: chat_web
+  #    ports:
+  #      - "8000:82"          # хост:контейнер
+  #    depends_on:
+  #      db:
+  #        condition: service_healthy
+  #    env_file:
+  #        - .env
+  #    entrypoint: ["/app/entrypoint.sh"]
+  #    command: python /app/web/manage.py runserver 0.0.0.0:82
 
   db:
     image: postgres:15
@@ -21,7 +21,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 10          # больше попыток — надёжнее при первом запуске
@@ -31,16 +31,47 @@ services:
 
 
   adminer:
-      image: adminer:latest
-      container_name: chat_adminer
-      restart: unless-stopped
-      ports:
-        - "8080:8080"                       #8080 внутри контейнера
-      environment:
-        ADMINER_DEFAULT_SERVER: db
-        ADMINER_DESIGN: pepa-linha        # опционально — красивая тема
-      depends_on:
-        - db
+    image: adminer:latest
+    container_name: chat_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"                       #8080 внутри контейнера
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: pepa-linha        # опционально — красивая тема
+    depends_on:
+      - db
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: chat_redis
+    ports:
+      - "6379:6379"        # хост:контейнер
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+  worker:
+    build: .
+    container_name: chat_worker
+    depends_on:
+      - redis
+      - db
+    env_file:
+      - .env
+    environment:
+      PYTHONPATH: /app/web
+    command: celery -A web.config worker -l info
+
+
+
 
 volumes:
   pgdata:
+  redisdata:
