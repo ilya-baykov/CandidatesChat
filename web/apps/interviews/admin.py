@@ -1,8 +1,6 @@
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from django.contrib import admin
 from django.http import HttpResponseRedirect
-from django.urls import reverse
-
 from core.mixins.admin import RedirectToChangeMixin
 from .models import (
     Candidate,
@@ -12,6 +10,7 @@ from .models import (
 )
 from .services.ai_question_generation.generator import ai_question_generator
 from .services.interview_preparation import InterviewPreparationService
+from .tasks import generate_questions_for_interview
 
 
 @admin.register(Candidate)
@@ -84,8 +83,13 @@ class InterviewAdmin(RedirectToChangeMixin, ExtraButtonsMixin, admin.ModelAdmin)
         try:
             interview = Interview.objects.select_related("candidate", "vacancy").get(id=pk)
 
-            service = InterviewPreparationService(question_generator=ai_question_generator)
-            service.prepare_interview(interview=interview, questions_count=5)
+            if interview.questions.exists():  # noqa
+                self.message_user(request, f"Ошибка: Вопросы для этого интервью уже сгенерированы. "
+                                           f"Удалите существующие, если нужно перегенерировать.", level="error")
+                return HttpResponseRedirect(self.redirect_to_change(pk))
+
+            # Если проверка пройдена — ставим задачу в очередь
+            generate_questions_for_interview.delay(interview_id=interview.pk, questions_count=5)
 
             self.message_user(request, "Задача на генерацию вопросов поставлена в очередь.", level="success")
         except Interview.DoesNotExist:

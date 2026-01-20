@@ -43,9 +43,6 @@ def run_ai_validation_task(
 
 @shared_task
 def generate_questions_for_interview(interview_id: int, questions_count: int) -> None:
-
     interview = Interview.objects.select_related("candidate", "vacancy").get(id=interview_id)
-
     service = InterviewPreparationService(question_generator=ai_question_generator)
-
     service.prepare_interview(interview=interview, questions_count=questions_count)
