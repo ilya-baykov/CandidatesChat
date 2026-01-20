@@ -10,7 +10,7 @@ from .models import (
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
     """Админка для кандидатов"""
-    list_display = ("full_name", "external_id", "created_at")
+    list_display = ("full_name", "external_id", "resume_text", "created_at")
     search_fields = ("full_name", "external_id", "contacts")
     ordering = ("full_name",)
 
