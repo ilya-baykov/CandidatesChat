@@ -35,7 +35,11 @@
                 placeholder="Введите ваш ответ…"
                 required
             ></textarea>
-            <button type="submit" id="send-btn">Отправить</button>
+            <button
+                    type="submit"
+                    id="send-btn"
+                    {% if is_processing %}disabled{% endif %}
+            >Отправить</button>
         </form>
     {% else %}
         <div class="chat-finished">
