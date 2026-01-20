@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+from core.mixins.admin import RedirectToChangeMixin
 from .models import (
     Candidate,
     Vacancy,
@@ -57,7 +58,7 @@ class InterviewMessageInline(admin.TabularInline):
 
 
 @admin.register(Interview)
-class InterviewAdmin(ExtraButtonsMixin, admin.ModelAdmin):
+class InterviewAdmin(RedirectToChangeMixin, ExtraButtonsMixin, admin.ModelAdmin):
     """
     Админка для интервью.
     Позволяет создавать интервью, добавлять вопросы.
@@ -83,13 +84,8 @@ class InterviewAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         try:
             interview = Interview.objects.select_related("candidate", "vacancy").get(id=pk)
 
-            if interview.questions.exists():
-                self.message_user(request, "Вопросы для этого интервью уже сгенерированы.", level="warning")
-                return HttpResponseRedirect(self.get_redirect_url(pk))
-            else:
-
-                service = InterviewPreparationService(question_generator=ai_question_generator)
-                service.prepare_interview(interview=interview, questions_count=5)
+            service = InterviewPreparationService(question_generator=ai_question_generator)
+            service.prepare_interview(interview=interview, questions_count=5)
 
             self.message_user(request, "Задача на генерацию вопросов поставлена в очередь.", level="success")
         except Interview.DoesNotExist:
@@ -97,13 +93,4 @@ class InterviewAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         except Exception as e:
             self.message_user(request, f"Ошибка: {str(e)}", level="error")
 
-        return HttpResponseRedirect(self.get_redirect_url(pk))
-
-    def get_redirect_url(self, pk):
-        """Вспомогательный метод — можно вынести для удобства"""
-        opts = self.model._meta
-        return reverse(
-            f"admin:{opts.app_label}_{opts.model_name}_change",
-            args=(pk,),
-            current_app=self.admin_site.name,
-        )
+        return HttpResponseRedirect(self.redirect_to_change(pk))
