@@ -1,5 +1,7 @@
 from django.db import models
 
+from apps.interviews.models.answer_status import AnswerStatusQuerySet
+
 
 class InterviewStatus(models.Model):
     """
@@ -98,6 +100,7 @@ class AnswerStatus(models.Model):
         default=0,
         help_text="Порядок отображения в админке.",
     )
+    objects = AnswerStatusQuerySet.as_manager()
 
     class Meta:
         ordering = ["order"]

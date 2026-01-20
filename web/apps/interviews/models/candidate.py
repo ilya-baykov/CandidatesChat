@@ -13,6 +13,7 @@ class Candidate(models.Model):
     )
     full_name = models.CharField(max_length=255, help_text="ФИО кандидата")
     contacts = models.CharField(max_length=255, null=True, blank=True, help_text="Контакты кандидата")
+    resume_text = models.TextField(null=True, blank=True, help_text="Текст резюме кандидата")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
