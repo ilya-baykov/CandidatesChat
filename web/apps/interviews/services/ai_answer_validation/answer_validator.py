@@ -40,8 +40,7 @@ class AIAnswerValidator(AnswerValidator):
             user_answer=answer_text,
             question_history=question_history,
         )
-        print(f"Количество символов в промпте: {len(prompt)}")
-        print(f"Ответ пользователя:{answer_text}")
+        print(f"Количество символов в промпте: {len(prompt)}\nОтвет пользователя:{answer_text}")
         for _ in range(self.max_attempts):
             raw_text = self.client.get_answer(prompt)
             verdict = JsonExtractor.extract_json(raw_text)
