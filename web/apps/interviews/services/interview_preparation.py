@@ -21,7 +21,7 @@ class InterviewPreparationService:
             questions_count=questions_count,
         )
 
-        default_status = AnswerStatus.objects.default()
+        default_status = AnswerStatus.objects.get_pending()  # Всегда устанавливаем статус по-умолчанию (pending)
         if default_status is None:
             raise RuntimeError("Не найден активный статус ответа по умолчанию")
 
