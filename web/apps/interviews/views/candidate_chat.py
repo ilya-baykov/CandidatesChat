@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
@@ -68,12 +68,4 @@ class CandidateInterviewView(View):
             question_id=question.pk,
             answer_text=answer_text,
         )
-
-        # Отрисовываем текущее состояние (без AI-результата)
-        state = flow.get_state_for_display()
-        context = {
-            "interview": interview,
-            **state,
-        }
-
-        return render(request, self.template_name, context)
+        return redirect(request.path)
