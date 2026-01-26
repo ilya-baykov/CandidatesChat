@@ -28,7 +28,7 @@ class InterviewViewSet(viewsets.GenericViewSet):
         GET /interviews/by-candidate-vacancy/?candidate_id=1234&vacancy_id=1234
     """
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):  # noqa
         """
         Создаёт новое интервью или возвращает уже существующее по паре candidate_id + vacancy_id.
 
