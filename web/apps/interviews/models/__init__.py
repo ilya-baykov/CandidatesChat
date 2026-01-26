@@ -10,8 +10,8 @@
 - InterviewMessage: лог сообщений в рамках интервью
 """
 
-from .candidate import Candidate
-from .vacancy import Vacancy
+# from .candidate import Candidate
+# from .vacancy import Vacancy
 from .interview import Interview
 from .question import InterviewQuestion
 from .answer import InterviewAnswer

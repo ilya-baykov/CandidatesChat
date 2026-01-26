@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from core.mixins.admin import RedirectToChangeMixin
 from .models import (
-    Candidate,
-    Vacancy,
+    # Candidate,
+    # Vacancy,
     Interview,
     InterviewQuestion, InterviewMessage,
 )
@@ -13,20 +13,20 @@ from .services.interview_preparation import InterviewPreparationService
 from .tasks import generate_questions_for_interview
 
 
-@admin.register(Candidate)
-class CandidateAdmin(admin.ModelAdmin):
-    """Админка для кандидатов"""
-    list_display = ("full_name", "external_id", "resume_text", "created_at")
-    search_fields = ("full_name", "external_id", "contacts")
-    ordering = ("full_name",)
-
-
-@admin.register(Vacancy)
-class VacancyAdmin(admin.ModelAdmin):
-    """Админка для вакансий"""
-    list_display = ("title", "vacancy_description", "external_id")
-    search_fields = ("title", "vacancy_description", "external_id")
-    ordering = ("title",)
+# @admin.register(Candidate)
+# class CandidateAdmin(admin.ModelAdmin):
+#     """Админка для кандидатов"""
+#     list_display = ("full_name", "external_id", "resume_text", "created_at")
+#     search_fields = ("full_name", "external_id", "contacts")
+#     ordering = ("full_name",)
+#
+#
+# @admin.register(Vacancy)
+# class VacancyAdmin(admin.ModelAdmin):
+#     """Админка для вакансий"""
+#     list_display = ("title", "vacancy_description", "external_id")
+#     search_fields = ("title", "vacancy_description", "external_id")
+#     ordering = ("title",)
 
 
 class InterviewQuestionInline(admin.TabularInline):
@@ -63,10 +63,10 @@ class InterviewAdmin(RedirectToChangeMixin, ExtraButtonsMixin, admin.ModelAdmin)
     Позволяет создавать интервью, добавлять вопросы.
     Ответы и сообщения пока не редактируются через админку.
     """
-    list_display = ("id", "candidate", "vacancy", "status", "started_at", "completed_at", "total_score")
-    search_fields = ("candidate__full_name", "candidate__external_id", "vacancy__title")
-    list_filter = ("status", "vacancy")
-    readonly_fields = ("token_link", "started_at", "completed_at", "total_score")
+    list_display = ("id", "candidate_id", "vacancy_id", "status", "started_at", "completed_at", "total_score")
+    # search_fields = ("candidate__full_name", "candidate__external_id", "vacancy__title")
+    # list_filter = ("status", "vacancy")
+    readonly_fields = ("token", "started_at", "completed_at", "total_score")
     inlines = [InterviewQuestionInline, InterviewMessageInline]
     ordering = ("-started_at",)
 

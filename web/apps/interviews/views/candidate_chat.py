@@ -19,17 +19,15 @@ class CandidateInterviewView(View):
     template_name = "interviews/chat.html"
 
     @staticmethod
-    def get_interview() -> Interview:
-        """
-        MVP-реализация.
-        Позже будет поиск по token_link.
-        """
-        return (
+    def get_interview(self, token) -> Interview:
+        """Получение уникального интервью для конкретного кандидата ( по токену чата )"""
+        interview = get_object_or_404(
             Interview.objects
-            .select_related("candidate", "vacancy", "status")
-            .prefetch_related("messages__role")
-            .first()
+            .select_related("status")
+            .prefetch_related("messages__role"),
+            token=token,
         )
+        return interview
 
     def get(self, request):
         interview = self.get_interview()
