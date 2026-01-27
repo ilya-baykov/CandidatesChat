@@ -8,6 +8,7 @@ from django.http import Http404
 
 from api.serializers.interviews import InterviewCreateInputSerializer, InterviewDetailSerializer
 from apps.interviews.models import Interview
+from apps.interviews.services.interview_preparation.interview_creation import InterviewCreationService
 from apps.interviews.services.interviews import InterviewService
 
 
@@ -43,7 +44,8 @@ class InterviewViewSet(viewsets.GenericViewSet):
         input_serializer = InterviewCreateInputSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
 
-        interview, created = InterviewService.create_or_get_interview(
+        # Создание интервью с вызовом celery-задачи на генерацию вопросов
+        interview, created = InterviewCreationService.execute(
             candidate_id=input_serializer.validated_data['candidate_id'],
             vacancy_id=input_serializer.validated_data['vacancy_id']
         )

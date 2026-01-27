@@ -3,7 +3,7 @@ from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
 from apps.interviews.services.flow import InterviewFlowService
-from apps.interviews.tasks import run_ai_validation_task
+from apps.interviews.tasks.triggers import start_answer_validation
 
 
 class CandidateInterviewView(View):
@@ -40,7 +40,7 @@ class CandidateInterviewView(View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request, run_ai_validation_task=run_ai_validation_task):
+    def post(self, request):
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text", "").strip()
 
@@ -60,8 +60,7 @@ class CandidateInterviewView(View):
         )
 
         # Запуск async use-case (Проверяем ответ пользователя и проводим flow-обработки сообщения)
-        # Логика класса InterviewAnswerProcessingService (см tasks.py)
-        run_ai_validation_task.delay(
+        start_answer_validation(
             interview_id=interview.pk,
             question_id=question.pk,
             answer_text=answer_text,

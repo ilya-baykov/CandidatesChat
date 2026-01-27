@@ -1,11 +1,9 @@
 from django.utils import timezone
-from django.db import transaction
 
 from ..collections import InterviewCodes
 from ..models import Interview
 from ..services.questions import QuestionService
 from ...reference.models import InterviewStatus
-from ...interviews.tasks import generate_questions_for_interview
 
 
 class InterviewService:
@@ -28,21 +26,8 @@ class InterviewService:
         return interview
 
     @staticmethod
-    def create_or_get_interview(candidate_id, vacancy_id, questions_count=5):
-        """Создает новое интервью и ставит задачу по генерации вопросов в очередь"""
-        with transaction.atomic():
-            interview, created = Interview.objects.get_or_create(
-                candidate_id=candidate_id,
-                vacancy_id=vacancy_id,
-                defaults={"status": InterviewStatus.objects.get(code="in_progress"), },
-            )
-
-            if created:
-                transaction.on_commit(
-                    lambda: generate_questions_for_interview.delay(
-                        interview_id=interview.pk,
-                        questions_count=questions_count,
-                    )
-                )
-
-            return interview, created
+    def mark_as_failed_precondition(interview: Interview) -> None:
+        """Помечает интервью как невалидное"""
+        failed_status = InterviewStatus.objects.get(code="failed_precondition")
+        interview.status = failed_status
+        interview.save(update_fields=["status"])

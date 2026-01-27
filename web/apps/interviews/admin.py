@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from core.mixins.admin import RedirectToChangeMixin
 from .models import Interview, InterviewQuestion, InterviewMessage
-from .tasks import generate_questions_for_interview
+from ..interviews.tasks.triggers import start_generate_questions
 
 
 class InterviewQuestionInline(admin.TabularInline):
@@ -64,7 +64,7 @@ class InterviewAdmin(RedirectToChangeMixin, ExtraButtonsMixin, admin.ModelAdmin)
                 return HttpResponseRedirect(self.redirect_to_change(pk))
 
             # Если проверка пройдена — ставим задачу в очередь
-            generate_questions_for_interview.delay(interview_id=interview.pk, questions_count=5)
+            start_generate_questions(interview_id=interview.pk, questions_count=5)
 
             self.message_user(request, "Задача на генерацию вопросов поставлена в очередь.", level="success")
         except Interview.DoesNotExist:
