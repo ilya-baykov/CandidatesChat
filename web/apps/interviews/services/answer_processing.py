@@ -1,6 +1,7 @@
 from .ai_answer_validation.answer_validator import ai_answer_validator
 from .answers import AnswerService
 from .constants import INTERVIEW_SAVED_MESSAGE
+from .interview_preparation.dto import VacancyContextDTO
 from .interviews import InterviewService
 from .message_service import MessageService
 from .questions import QuestionService
@@ -15,7 +16,6 @@ class InterviewAnswerProcessingService:
     Запускается:
     - через Celery
     """
-
     AI_ANSWER_VALIDATOR = ai_answer_validator
 
     message_service = MessageService
@@ -23,10 +23,18 @@ class InterviewAnswerProcessingService:
     answer_service = AnswerService
     interview_service = InterviewService
 
-    def __init__(self, interview: Interview):
+    def __init__(self, interview: Interview, question: InterviewQuestion, vacancy: VacancyContextDTO):
+        """
+        Инициализация
+        :param interview: Текущее интервью
+        :param question:  Текущий вопрос
+        :param vacancy:   Текущая вакансия (связана с интервью)
+        """
         self.interview = interview
+        self.question = question
+        self.vacancy = vacancy
 
-    def process(self, *, question: InterviewQuestion, answer_text: str) -> None:
+    def process(self, *, answer_text: str) -> None:
         """
         Полный use-case обработки ответа:
         - формирование истории
@@ -34,53 +42,36 @@ class InterviewAnswerProcessingService:
         - применение результата
         - завершение интервью
         """
-        history = self.message_service.build_question_history(
-            interview=self.interview,
-            question=question,
-        )
+        # История вопроса
+        history = self.message_service.build_question_history(interview=self.interview, question=self.question)
 
+        # Валидация ответа (долгая операция)
         validation_result = self.AI_ANSWER_VALIDATOR.validate(
-            vacancy_title=self.interview.vacancy.title,
-            vacancy_description=self.interview.vacancy.vacancy_description,
-            question=question,
+            vacancy_title=self.vacancy.job_title,
+            vacancy_description=self.vacancy.prompt_description,
+            question=self.question,
             answer_text=answer_text,
-            question_history=history,
-        )
-        self._apply_validation_result(
-            question=question,
-            answer_text=answer_text,
-            validation_result=validation_result,
-        )
+            question_history=history)
 
+        # Применение результата валидации
+        self._apply_validation_result(answer_text=answer_text, validation_result=validation_result)
+
+        # Завершение интервью при необходимости *
         self._advance_interview_if_needed()
 
-    # ------------------------------------------------------------------
-    # Internal steps
-    # ------------------------------------------------------------------
-
-    def _apply_validation_result(
-            self,
-            *,
-            question: InterviewQuestion,
-            answer_text: str,
-            validation_result,
-    ) -> None:
-        """
-        Применяет результат AI-валидации.
-        """
+    def _apply_validation_result(self, *, answer_text: str, validation_result) -> None:
+        """Применяет результат AI-валидации."""
         if validation_result.reply_message:
             self.message_service.add_message(
                 interview=self.interview,
-                question=question,
+                question=self.question,
                 role_code="agent",
-                content=validation_result.reply_message,
-            )
+                content=validation_result.reply_message)
 
         self.answer_service.save(
-            question=question,
+            question=self.question,
             answer_text=answer_text,
-            score=validation_result.score,
-        )
+            score=validation_result.score)
 
         next_status = (
             AnswerCodes.SCORED
@@ -88,15 +79,10 @@ class InterviewAnswerProcessingService:
             else AnswerCodes.REPEAT
         )
 
-        self.question_service.mark_status(
-            question=question,
-            code=next_status,
-        )
+        self.question_service.mark_status(question=self.question, code=next_status)
 
     def _advance_interview_if_needed(self) -> None:
-        """
-        Завершает интервью, если активных вопросов больше нет.
-        """
+        """Завершает интервью, если активных вопросов больше нет."""
         completed = self.interview_service.complete_if_done(self.interview)
 
         if completed:

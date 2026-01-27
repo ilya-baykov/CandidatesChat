@@ -15,14 +15,6 @@ def generate_questions_for_interview(interview_id: int, questions_count: int) ->
     candidate = InterviewContextFactory.build_candidate(interview.candidate_id)
     vacancy = InterviewContextFactory.build_vacancy(interview.vacancy_id)
 
-    if not candidate or not candidate.resume_text:
-        InterviewService.mark_as_failed_precondition(interview)
-        return
-
-    if not vacancy:
-        InterviewService.mark_as_failed_precondition(interview)
-        return
-
     service = InterviewPreparationService(question_generator=ai_question_generator)
     service.prepare_interview(
         interview=interview,

@@ -19,7 +19,7 @@ class VacancyContextDTO:
     wishes_prompt: str
 
     @property
-    def build_prompt_description(self) -> str:
+    def prompt_description(self) -> str:
         """Человекочитаемое описание вакансии для промпта"""
         fields = [
             ("Название вакансии", self.job_title or self.title),

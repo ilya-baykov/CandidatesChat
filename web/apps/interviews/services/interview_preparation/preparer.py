@@ -16,7 +16,7 @@ class InterviewPreparationService:
                           questions_count: int) -> None:
         questions = self.question_generator.generate(
             vacancy_title=vacancy.job_title,
-            vacancy_description=vacancy.build_prompt_description,
+            vacancy_description=vacancy.prompt_description,
             candidate_resume=candidate.resume_text or "",
             questions_count=questions_count,
         )
