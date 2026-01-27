@@ -46,7 +46,6 @@ class InterviewAnswerProcessingService:
             answer_text=answer_text,
             question_history=history,
         )
-        print(validation_result)
         self._apply_validation_result(
             question=question,
             answer_text=answer_text,

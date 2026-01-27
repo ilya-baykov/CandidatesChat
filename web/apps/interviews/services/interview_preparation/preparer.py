@@ -1,5 +1,6 @@
-from apps.interviews.models import InterviewQuestion, Interview
+from apps.interviews.models import InterviewQuestion
 from apps.interviews.services.ai_question_generation.generator import QuestionGenerator
+from apps.interviews.services.interview_preparation.dto import CandidateContextDTO, VacancyContextDTO
 from apps.reference.models import AnswerStatus
 
 
@@ -10,21 +11,17 @@ class InterviewPreparationService:
 
     def prepare_interview(self, *,
                           interview,
+                          candidate: CandidateContextDTO,
+                          vacancy: VacancyContextDTO,
                           questions_count: int) -> None:
-
-        candidate = interview.candidate
-        vacancy = interview.vacancy
-
         questions = self.question_generator.generate(
-            vacancy_title=vacancy.title,
-            vacancy_description=vacancy.vacancy_description or "",
+            vacancy_title=vacancy.job_title,
+            vacancy_description=vacancy.build_prompt_description,
             candidate_resume=candidate.resume_text or "",
             questions_count=questions_count,
         )
 
         default_status = AnswerStatus.objects.get_pending()  # Всегда устанавливаем статус по-умолчанию (pending)
-        if default_status is None:
-            raise RuntimeError("Не найден активный статус ответа по умолчанию")
 
         for q in questions:
             InterviewQuestion.objects.create(
