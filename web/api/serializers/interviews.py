@@ -8,9 +8,8 @@ class InterviewCreateInputSerializer(serializers.Serializer):
     Входной сериализатор для эндпоинта создания/поиска интервью (POST /interviews/).
     При невалидных данных будет возвращена 400 Bad Request с детальным описанием ошибок.
     """
-
-    candidate_id = serializers.UUIDField(help_text="UUID кандидата из системы ОКО")
-    vacancy_id = serializers.UUIDField(help_text="UUID вакансии из системы ОКО")
+    candidate_id = serializers.IntegerField(help_text="ID кандидата из системы ОКО")
+    vacancy_id = serializers.IntegerField(help_text="ID вакансии из системы ОКО")
 
 
 class InterviewDetailSerializer(serializers.ModelSerializer):
@@ -37,4 +36,4 @@ class InterviewDetailSerializer(serializers.ModelSerializer):
             'completed_at',
             'total_score',
         ]
-        read_only_fields = '__all__'
+        read_only_fields = ['id', 'token', 'status', 'started_at', 'completed_at', 'total_score']
