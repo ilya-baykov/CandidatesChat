@@ -28,6 +28,6 @@ class InterviewService:
     @staticmethod
     def mark_as_failed_precondition(interview: Interview) -> None:
         """Помечает интервью как невалидное"""
-        failed_status = InterviewStatus.objects.get(code="failed_precondition")
+        failed_status = InterviewStatus.objects.get(code=InterviewCodes.FAILED_PRECONDITION)
         interview.status = failed_status
         interview.save(update_fields=["status"])

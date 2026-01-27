@@ -14,6 +14,7 @@ class InterviewCodes:
     DRAFT = "draft"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
+    FAILED_PRECONDITION = "failed_precondition"
 
 
 # Литералы для простого использования
