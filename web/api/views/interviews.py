@@ -106,17 +106,6 @@ class InterviewViewSet(viewsets.GenericViewSet):
         if not candidate_id or not vacancy_id:
             raise ValidationError({'detail': 'Требуются параметры candidate_id и vacancy_id'})
 
-        # Валидация формата UUID
-        try:
-            uuid.UUID(candidate_id)
-        except ValueError:
-            raise ValidationError({'candidate_id': 'Некорректный формат UUID'})
-
-        try:
-            uuid.UUID(vacancy_id)
-        except ValueError:
-            raise ValidationError({'vacancy_id': 'Некорректный формат UUID'})
-
         # Безопасное получение с обработкой исключения
         try:
             interview = InterviewService.get_by_candidate_and_vacancy(
