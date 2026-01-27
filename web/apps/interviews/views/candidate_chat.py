@@ -18,16 +18,14 @@ class CandidateInterviewView(View):
 
     template_name = "interviews/chat.html"
 
-    @staticmethod
-    def get_interview(self, token) -> Interview:
-        """Получение уникального интервью для конкретного кандидата ( по токену чата )"""
-        interview = get_object_or_404(
+    def get_interview(self) -> Interview:
+        """Получение уникального интервью для конкретного кандидата (по токену чата)"""
+        return get_object_or_404(
             Interview.objects
             .select_related("status")
             .prefetch_related("messages__role"),
-            token=token,
+            token=self.kwargs["token"],
         )
-        return interview
 
     def get(self, request):
         interview = self.get_interview()
