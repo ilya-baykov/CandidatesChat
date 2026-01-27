@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from apps.interviews.services.interview_preparation.dto import CandidateContextDTO, VacancyContextDTO
@@ -11,11 +12,18 @@ class InterviewContextFactory:
     def build_candidate(candidate_id: int) -> Optional[CandidateContextDTO]:
         tmp_path = f"/tmp/resume_{candidate_id}.pdf"
 
-        if not oko_client.download_candidate_resume(candidate_id, tmp_path):
-            return None
+        try:
+            if not oko_client.download_candidate_resume(candidate_id, tmp_path):
+                return None
 
-        resume_text = PDFTextExtractor.get_text(tmp_path)
-        return CandidateContextDTO(id=candidate_id, resume_text=resume_text)
+            resume_text = PDFTextExtractor.get_text(tmp_path)
+            return CandidateContextDTO(id=candidate_id, resume_text=resume_text)
+        except Exception as e:
+            pass
+        finally:
+            # удаляем временный файл
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
 
     @staticmethod
     def build_vacancy(vacancy_id: int) -> Optional[VacancyContextDTO]:
