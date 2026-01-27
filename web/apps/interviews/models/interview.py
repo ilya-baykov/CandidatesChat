@@ -11,8 +11,8 @@ class Interview(models.Model):
     Один кандидат + одна вакансия = один диалог.
     """
 
-    candidate_id = models.UUIDField(db_index=True)  # id кандидата (из БД ОКО)
-    vacancy_id = models.UUIDField(db_index=True)  # id вакансии (из БД ОКО)
+    candidate_id = models.IntegerField(db_index=True)  # id кандидата (из БД ОКО)
+    vacancy_id = models.IntegerField(db_index=True)  # id вакансии (из БД ОКО)
 
     status = models.ForeignKey(InterviewStatus, on_delete=models.CASCADE, help_text="Статус интервью")
     token = models.UUIDField(unique=True, db_index=True, default=uuid.uuid4,

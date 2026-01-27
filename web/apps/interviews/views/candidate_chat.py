@@ -27,7 +27,7 @@ class CandidateInterviewView(View):
             token=self.kwargs["token"],
         )
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         interview = self.get_interview()
         flow = InterviewFlowService(interview=interview)
 
@@ -38,7 +38,7 @@ class CandidateInterviewView(View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text", "").strip()
 

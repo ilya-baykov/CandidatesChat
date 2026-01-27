@@ -6,7 +6,7 @@ from ..services.answer_processing import InterviewAnswerProcessingService
 from ..services.interview_preparation.context_factory import InterviewContextFactory
 
 
-@shared_task
+@shared_task(name="apps.interviews.tasks.run_ai_validation_task")
 def run_ai_validation_task(*,
                            interview_id: int,
                            question_id: int,

@@ -4,10 +4,9 @@ from ..models import Interview
 from ..services.ai_question_generation.generator import ai_question_generator
 from ..services.interview_preparation.context_factory import InterviewContextFactory
 from ..services.interview_preparation.preparer import InterviewPreparationService
-from ..services.interviews import InterviewService
 
 
-@shared_task
+@shared_task(name="apps.interviews.tasks.generate_questions_for_interview")
 def generate_questions_for_interview(interview_id: int, questions_count: int) -> None:
     """Генерирует вопросы для интервью"""
     interview = Interview.objects.get(id=interview_id)

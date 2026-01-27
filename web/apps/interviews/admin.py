@@ -56,7 +56,7 @@ class InterviewAdmin(RedirectToChangeMixin, ExtraButtonsMixin, admin.ModelAdmin)
         Генерация вопросов для интервью через Celery-задачу
         """
         try:
-            interview = Interview.objects.select_related("candidate", "vacancy").get(id=pk)
+            interview = Interview.objects.get(id=pk)
 
             if interview.questions.exists():  # noqa
                 self.message_user(request, f"Ошибка: Вопросы для этого интервью уже сгенерированы. "
