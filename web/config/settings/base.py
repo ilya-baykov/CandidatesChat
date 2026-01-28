@@ -165,3 +165,24 @@ CACHES = {
         "KEY_PREFIX": "candidateschat",
     }
 }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # Не отключаем логгеры сторонних библиотек
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',  # Просто вывод в терминал (stdout)
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/app.log',  # Файл, в который пишем логи
+            'maxBytes': 10 * 1024 * 1024,  # 10 МБ — максимальный размер одного файла
+            'backupCount': 10,  # Сколько старых файлов хранить:
+        },
+    },
+
+    'root': {
+        'handlers': ['console', 'file'],  # Каждый лог попадает и в консоль, и в файл
+        'level': 'DEBUG',  # Записываем сообщения уровня INFO и серьёзнее:
+    },
+}
