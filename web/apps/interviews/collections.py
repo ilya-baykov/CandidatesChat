@@ -8,6 +8,7 @@ class AnswerCodes(Enum):
     VALIDATING = "validating"
     SCORED = "scored"
     REPEAT = "repeat"
+    FAILED_VALIDATION = "failed_validation"
 
 
 class InterviewCodes:
@@ -24,4 +25,5 @@ AnswerCodeLiteral: TypeAlias = Literal[
     AnswerCodes.ANSWERED,
     AnswerCodes.SCORED,
     AnswerCodes.REPEAT,
+    AnswerCodes.FAILED_VALIDATION,
 ]
