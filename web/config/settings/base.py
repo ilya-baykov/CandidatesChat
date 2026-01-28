@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
 # Загружаем .env.local
 load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
 
@@ -167,22 +170,40 @@ CACHES = {
 }
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,  # Не отключаем логгеры сторонних библиотек
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',  # Просто вывод в терминал (stdout)
-        },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'logs/app.log',  # Файл, в который пишем логи
-            'maxBytes': 10 * 1024 * 1024,  # 10 МБ — максимальный размер одного файла
-            'backupCount': 10,  # Сколько старых файлов хранить:
+    "version": 1,
+    "disable_existing_loggers": False,  # Не отключаем логгеры сторонних библиотек
+
+    "formatters": {
+        "default": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
         },
     },
 
-    'root': {
-        'handlers': ['console', 'file'],  # Каждый лог попадает и в консоль, и в файл
-        'level': 'DEBUG',  # Записываем сообщения уровня INFO и серьёзнее:
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "default",
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": str(LOG_DIR / "app.log"),
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 5,
+            "formatter": "default",
+        },
+    },
+
+    "root": {
+        "handlers": ["console", "file"],
+        "level": os.getenv("LOG_LEVEL", "INFO"),
+    },
+
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
