@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-LOG_DIR = BASE_DIR / "logs"
-LOG_DIR.mkdir(exist_ok=True)
 
 # Загружаем .env.local
 load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
@@ -98,6 +96,9 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        # "OPTIONS": {
+        #     "options": "-c search_path=candidateschat"
+        # }
     }
 }
 # ---------------------------------------------------------------------
@@ -185,23 +186,23 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "default",
         },
-        "file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": str(LOG_DIR / "app.log"),
-            "maxBytes": 10 * 1024 * 1024,  # 10 MB
-            "backupCount": 5,
-            "formatter": "default",
-        },
+        # "file": {
+        #     "class": "logging.handlers.RotatingFileHandler",
+        #     "filename": str(LOG_DIR / "app.log"),
+        #     "maxBytes": 10 * 1024 * 1024,  # 10 MB
+        #     "backupCount": 5,
+        #     "formatter": "default",
+        # },
     },
 
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": os.getenv("LOG_LEVEL", "INFO"),
     },
 
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },

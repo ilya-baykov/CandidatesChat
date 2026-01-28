@@ -1,3 +1,4 @@
+from apps.exceptions import InterviewPreconditionError, InterviewGenerationError
 from apps.interviews.models import InterviewQuestion
 from apps.interviews.services.ai_question_generation.generator import QuestionGenerator
 from apps.interviews.services.interview_preparation.dto import CandidateContextDTO, VacancyContextDTO
@@ -14,12 +15,16 @@ class InterviewPreparationService:
                           candidate: CandidateContextDTO,
                           vacancy: VacancyContextDTO,
                           questions_count: int) -> None:
+
+        # Генерация вопросов
         questions = self.question_generator.generate(
             vacancy_title=vacancy.job_title,
             vacancy_description=vacancy.prompt_description,
             candidate_resume=candidate.resume_text or "",
             questions_count=questions_count,
         )
+        if not questions:
+            raise InterviewGenerationError()
 
         default_status = AnswerStatus.objects.get_pending()  # Всегда устанавливаем статус по-умолчанию (pending)
 
