@@ -19,6 +19,9 @@ def run_ai_validation_task(*,
                            answer_text: str) -> None:
     """Проверка ответа пользователя"""
 
+    logger.info(f"Запуск задачи run_ai_validation_task для "
+                f"Интервью:{interview_id}; Вопрос:{question_id}")
+
     interview = Interview.objects.get(id=interview_id)
     vacancy = InterviewContextFactory.build_vacancy(interview.vacancy_id)
     question = InterviewQuestion.objects.get(id=question_id)
@@ -26,7 +29,10 @@ def run_ai_validation_task(*,
 
     try:
         with transaction.atomic():
+            logger.info(f"Начало обработки ответа для Интервью:{interview_id}, Вопрос:{question_id}")
             processor.process(answer_text=answer_text)
+            logger.info(f"Успешно обработан ответ для Интервью:{interview_id}, Вопрос:{question_id}")
+
 
 
     except Exception as e:

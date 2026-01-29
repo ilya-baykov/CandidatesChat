@@ -1,3 +1,5 @@
+import logging
+
 from .ai_answer_validation.answer_validator import ai_answer_validator
 from .answers import AnswerService
 from .constants import INTERVIEW_SAVED_MESSAGE
@@ -7,6 +9,8 @@ from .message_service import MessageService
 from .questions import QuestionService
 from ..collections import AnswerCodes, MessageRoleCodes
 from ..models import Interview, InterviewQuestion
+
+logger = logging.getLogger(__name__)
 
 
 class InterviewAnswerProcessingService:
@@ -42,6 +46,8 @@ class InterviewAnswerProcessingService:
         - применение результата
         - завершение интервью
         """
+        logger.info(f"Обработка ответа кандидата для Интервью:{self.interview.pk}, Вопрос:{self.question.pk}")
+
         # История вопроса
         history = self.message_service.build_question_history(interview=self.interview, question=self.question)
 
@@ -52,6 +58,8 @@ class InterviewAnswerProcessingService:
             question=self.question,
             answer_text=answer_text,
             question_history=history)
+        logger.info(f"Результат AI-валидации для Интервью:{self.interview.pk}, Вопрос:{self.question.pk} "
+                    f"Score:{validation_result.score}, Correct:{validation_result.is_correct}")
 
         # Применение результата валидации
         self._apply_validation_result(answer_text=answer_text, validation_result=validation_result)
@@ -67,6 +75,7 @@ class InterviewAnswerProcessingService:
                 question=self.question,
                 role_code=MessageRoleCodes.AGENT,
                 content=validation_result.reply_message)
+            logger.debug(f"Отправлено сообщение от агента для Интервью:{self.interview.pk}, Вопрос:{self.question.pk}")
 
         self.answer_service.save(
             question=self.question,
@@ -78,8 +87,10 @@ class InterviewAnswerProcessingService:
             if validation_result.is_correct
             else AnswerCodes.REPEAT
         )
-
+        
         self.question_service.mark_status(question=self.question, code=next_status)
+        logger.info(f"Статус вопроса обновлен для Интервью:{self.interview.pk}, Вопрос:{self.question.pk} "
+                    f"Новый статус:{next_status}")
 
     def _advance_interview_if_needed(self) -> None:
         """Завершает интервью, если активных вопросов больше нет."""
