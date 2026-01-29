@@ -19,6 +19,12 @@ class InterviewCodes:
     PENDING_QUESTIONS = "pending_questions"
 
 
+class MessageRoleCodes:
+    SYSTEM = "system"
+    AGENT = "agent"
+    CANDIDATE = "candidate"
+
+
 # Литералы для простого использования
 AnswerCodeLiteral: TypeAlias = Literal[
     AnswerCodes.PENDING,

@@ -5,7 +5,7 @@ from .interview_preparation.dto import VacancyContextDTO
 from .interviews import InterviewService
 from .message_service import MessageService
 from .questions import QuestionService
-from ..collections import AnswerCodes
+from ..collections import AnswerCodes, MessageRoleCodes
 from ..models import Interview, InterviewQuestion
 
 
@@ -65,7 +65,7 @@ class InterviewAnswerProcessingService:
             self.message_service.add_message(
                 interview=self.interview,
                 question=self.question,
-                role_code="agent",
+                role_code=MessageRoleCodes.AGENT,
                 content=validation_result.reply_message)
 
         self.answer_service.save(
@@ -88,6 +88,6 @@ class InterviewAnswerProcessingService:
         if completed:
             self.message_service.add_message(
                 interview=self.interview,
-                role_code="system",
+                role_code=MessageRoleCodes.SYSTEM,
                 content=INTERVIEW_SAVED_MESSAGE,
             )

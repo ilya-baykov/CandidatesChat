@@ -1,3 +1,4 @@
+from ..collections import MessageRoleCodes
 from ..models import Interview, InterviewMessage, InterviewQuestion
 from ...reference.models import MessageRole
 
@@ -46,7 +47,7 @@ class MessageService:
         exists = InterviewMessage.objects.filter(
             interview=interview,
             question=question,
-            role__code="system",
+            role__code=MessageRoleCodes.SYSTEM,
             content=question.question_text,
         ).exists()
 
@@ -54,6 +55,6 @@ class MessageService:
             MessageService.add_message(
                 interview=interview,
                 question=question,
-                role_code="system",
+                role_code=MessageRoleCodes.SYSTEM,
                 content=question.question_text,
             )

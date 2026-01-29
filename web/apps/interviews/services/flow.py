@@ -1,6 +1,6 @@
 from .message_service import MessageService
 from .questions import QuestionService
-from ..collections import AnswerCodes
+from ..collections import AnswerCodes, MessageRoleCodes
 from ..models import Interview, InterviewQuestion
 
 
@@ -59,7 +59,7 @@ class InterviewFlowService:
         self.message_service.add_message(
             interview=self.interview,
             question=question,
-            role_code="candidate",
+            role_code=MessageRoleCodes.CANDIDATE,
             content=answer_text,
         )
 
