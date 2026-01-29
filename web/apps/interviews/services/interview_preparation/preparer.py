@@ -1,8 +1,12 @@
-from apps.exceptions import InterviewPreconditionError, InterviewGenerationError
+import logging
+
+from apps.exceptions import InterviewGenerationError
 from apps.interviews.models import InterviewQuestion
 from apps.interviews.services.ai_question_generation.generator import QuestionGenerator
 from apps.interviews.services.interview_preparation.dto import CandidateContextDTO, VacancyContextDTO
 from apps.reference.models import AnswerStatus
+
+logger = logging.getLogger(__name__)
 
 
 class InterviewPreparationService:
@@ -16,6 +20,8 @@ class InterviewPreparationService:
                           vacancy: VacancyContextDTO,
                           questions_count: int) -> None:
 
+        logger.info("Начало подготовки интервью %s для кандидата %s", interview.pk, candidate.id)
+
         # Генерация вопросов
         questions = self.question_generator.generate(
             vacancy_title=vacancy.job_title,
@@ -24,6 +30,8 @@ class InterviewPreparationService:
             questions_count=questions_count,
         )
         if not questions:
+            logger.error(f"Не удалось сгенерировать вопросы для интервью {interview.pk}. "
+                         f"Кандидат: {candidate.id}, Вакансия: {vacancy.id}")
             raise InterviewGenerationError()
 
         default_status = AnswerStatus.objects.get_pending()  # Всегда устанавливаем статус по-умолчанию (pending)
@@ -35,3 +43,4 @@ class InterviewPreparationService:
                 order=q.order,
                 status=default_status,
             )
+        logger.info(f"Вопросы успешно созданы для интервью {interview.pk}")

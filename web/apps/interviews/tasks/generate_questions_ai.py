@@ -38,4 +38,4 @@ def generate_questions_for_interview(interview_id: int, questions_count: int) ->
         InterviewService.set_status(interview=interview, status_code=InterviewCodes.IN_PROGRESS)
     except Exception as e:
         InterviewService.mark_as_failed_precondition(interview)
-        logger.warning("Не удалось корректно создать интервью: %s", interview.pk, e)
+        logger.warning(f"Не удалось корректно создать интервью {interview.pk}: {e}")
