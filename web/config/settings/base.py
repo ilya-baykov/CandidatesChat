@@ -231,3 +231,5 @@ SPECTACULAR_SETTINGS = {
     # аккуратные enum / null
     "ENUM_NAME_OVERRIDES": {},
 }
+
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', []).split(',')
