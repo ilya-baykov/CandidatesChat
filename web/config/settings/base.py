@@ -4,7 +4,8 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Загружаем .env.local
 load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
@@ -36,6 +37,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "drf_spectacular",
     "django_celery_results",
     "admin_extra_buttons",
     # "django_celery_beat",
@@ -136,10 +138,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ---------------------------------------------------------------------
 # Django REST Framework
 # ---------------------------------------------------------------------
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
-    "DEFAULT_PERMISSION_CLASSES": [],
-}
 
 # ---------------------------------------------------------------------
 # Redis
@@ -186,13 +184,13 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "default",
         },
-        # "file": {
-        #     "class": "logging.handlers.RotatingFileHandler",
-        #     "filename": str(LOG_DIR / "app.log"),
-        #     "maxBytes": 10 * 1024 * 1024,  # 10 MB
-        #     "backupCount": 5,
-        #     "formatter": "default",
-        # },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": str(LOG_DIR / "app.log"),
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 5,
+            "formatter": "default",
+        },
     },
 
     "root": {
@@ -207,4 +205,29 @@ LOGGING = {
             "propagate": False,
         },
     },
+}
+
+REST_FRAMEWORK = {
+    # важно: именно spectacular
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+
+    # рендереры — чтобы и JSON, и браузер
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "CandidatesChat API",
+    "DESCRIPTION": "Service-to-service API для управления интервью кандидатов",
+    "VERSION": "1.0.0",
+
+    # убирает лишний мусор из схемы
+    "SERVE_INCLUDE_SCHEMA": False,
+
+    # адекватные имена компонентов
+    "COMPONENT_SPLIT_REQUEST": True,
+
+    # аккуратные enum / null
+    "ENUM_NAME_OVERRIDES": {},
 }

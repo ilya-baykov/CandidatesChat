@@ -1,6 +1,8 @@
 import logging
 
 from celery import shared_task
+
+from ..collections import InterviewCodes
 from ..models import Interview
 from ..services.ai_question_generation.generator import ai_question_generator
 from ..services.interview_preparation.context_factory import InterviewContextFactory
@@ -32,6 +34,8 @@ def generate_questions_for_interview(interview_id: int, questions_count: int) ->
             vacancy=vacancy,
             questions_count=questions_count)
 
+        # При успешной генерации вопросов устанавливаем статус интервью "В процессе"
+        InterviewService.set_status(interview=interview, status_code=InterviewCodes.IN_PROGRESS)
     except Exception as e:
         InterviewService.mark_as_failed_precondition(interview)
         logger.warning("Не удалось корректно создать интервью: %s", interview.pk, e)

@@ -31,3 +31,15 @@ class InterviewService:
         failed_status = InterviewStatus.objects.get(code=InterviewCodes.FAILED_PRECONDITION)
         interview.status = failed_status
         interview.save(update_fields=["status"])
+
+    @staticmethod
+    def set_status(interview: Interview, status_code: str) -> None:
+        """
+        Универсальный метод для установки статуса интервью.
+
+        Пример использования:
+            InterviewService.set_status(interview, InterviewCodes.IN_PROGRESS)
+        """
+        status_obj = InterviewStatus.objects.get(code=status_code)
+        interview.status = status_obj
+        interview.save(update_fields=["status"])

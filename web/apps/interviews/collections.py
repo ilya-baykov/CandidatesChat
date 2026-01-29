@@ -16,6 +16,7 @@ class InterviewCodes:
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED_PRECONDITION = "failed_precondition"
+    PENDING_QUESTIONS = "pending_questions"
 
 
 # Литералы для простого использования

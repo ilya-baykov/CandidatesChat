@@ -18,11 +18,6 @@ COPY requirements.txt /app/requirements.txt
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# СОЗДАЕМ ДИРЕКТОРИЮ ДЛЯ ЛОГОВ И НАЗНАЧАЕМ ПРАВА
-RUN mkdir -p /app/web/logs && chown -R userdocker:groupdocker /app/web/logs
-
-
-
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
@@ -32,6 +27,9 @@ RUN chmod +x /app/entrypoint.sh
 # Не забывать про файл .dockerignore чтобы не копировать лишние файлы
 COPY web/ ./web
 
+# СОЗДАЕМ ДИРЕКТОРИЮ ДЛЯ ЛОГОВ И НАЗНАЧАЕМ ПРАВА
+RUN mkdir -p /app/web/logs \
+    && chown -R userdocker:groupdocker /app/web
 
 
 RUN mkdir -p staticfiles media
