@@ -1,5 +1,7 @@
 from django.db import models
 
+from apps.interviews.collections import AnswerCodes
+
 
 class AnswerStatusQuerySet(models.QuerySet):
 
@@ -8,4 +10,4 @@ class AnswerStatusQuerySet(models.QuerySet):
 
     def get_pending(self):
         """Явно получаем статус 'pending'."""
-        return self.get(code="pending")
+        return self.get(code=AnswerCodes.PENDING.value)
