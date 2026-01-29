@@ -1,17 +1,19 @@
 services:
-  #  web:
-  #    build: .
-  #    image: chat_web
-  #    container_name: chat_web
-  #    ports:
-  #      - "8000:82"          # хост:контейнер
-  #    depends_on:
-  #      db:
-  #        condition: service_healthy
-  #    env_file:
-  #        - .env.OLD
-  #    entrypoint: ["/app/entrypoint.sh"]
-  #    command: python /app/web/manage.py runserver 0.0.0.0:82
+  web:
+    build: .
+    image: chat_web
+    container_name: chat_web
+    ports:
+      - "8000:82"          # хост:контейнер
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.docker
+    environment:
+      PYTHONPATH: /app
+    entrypoint: [ "/app/entrypoint.sh" ]
+    command: python /app/web/manage.py runserver 0.0.0.0:82
 
   db:
     image: postgres:15
@@ -21,7 +23,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost" ]
       interval: 5s
       timeout: 5s
       retries: 10          # больше попыток — надёжнее при первом запуске

@@ -1,14 +1,14 @@
 from pathlib import Path
 import os
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Загружаем .env.local
-load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
+# load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
 
 # ---------------------------------------------------------------------
 # Core
