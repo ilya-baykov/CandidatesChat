@@ -5,6 +5,8 @@ from django.core.cache import cache
 from dataclasses import asdict
 from apps.interviews.services.interview_preparation.dto import CandidateContextDTO, VacancyContextDTO
 from core.integrations.oko.api.api_client import oko_client
+from core.integrations.oko.repositories.vacancy_repository import OkoVacancyRow
+from core.integrations.oko.services.vacancy_service import OkoVacancyService
 from core.utilities.pdf_extractor import PDFTextExtractor
 
 logger = logging.getLogger(__name__)
@@ -54,19 +56,19 @@ class InterviewContextFactory:
         if cached:
             return VacancyContextDTO(**cached)
 
-        vacancy = oko_client.get_vacancy(vacancy_id)
-        if not vacancy:
+        row: OkoVacancyRow = OkoVacancyService.get_vacancy(vacancy_id)
+        if not row:
             return None
 
-        vacancy = VacancyContextDTO(
-            id=vacancy["id"],
-            title=vacancy.get("vacancy", ""),
-            city=vacancy.get("city", ""),
-            job_title=vacancy.get("job_title", ""),
-            main_responsibilities=vacancy.get("main_responsibilities", ""),
-            required_experience=vacancy.get("required_experience", ""),
-            software_knowledge=vacancy.get("software_knowledge", ""),
-            wishes_prompt=vacancy.get("wishes_prompt", ""),
+        vacancy_dto = VacancyContextDTO(
+            id=row["id"],
+            title=row["vacancy"],
+            city=row["city"],
+            job_title=row["job_title"],
+            main_responsibilities=row["main_responsibilities"],
+            required_experience=row["required_experience"],
+            software_knowledge=row["software_knowledge"],
+            wishes_prompt=row["wishes_prompt"],
         )
-        cache.set(cache_key, asdict(vacancy), timeout=InterviewContextFactory.VACANCY_CACHE_TTL)
-        return vacancy
+        cache.set(cache_key, asdict(vacancy_dto), timeout=InterviewContextFactory.VACANCY_CACHE_TTL)
+        return vacancy_dto
