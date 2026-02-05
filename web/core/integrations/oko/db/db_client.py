@@ -1,5 +1,8 @@
+import logging
 from contextlib import contextmanager
 from django.db import connection
+
+logger = logging.getLogger(__name__)
 
 
 class OkoDBClient:
@@ -16,6 +19,14 @@ class OkoDBClient:
     @staticmethod
     @contextmanager
     def cursor():
-        """Контекстный менеджер для получения cursor'а"""
-        with connection.cursor() as cursor:
-            yield cursor
+        """Контекстный менеджер для cursor'а БД ОКО."""
+        logger.debug("Открытие cursor для БД ОКО")
+
+        try:
+            with connection.cursor() as cursor:
+                yield cursor
+        except Exception:
+            logger.exception("Ошибка при работе с cursor БД ОКО")
+            raise
+        finally:
+            logger.debug("Закрытие cursor БД ОКО")

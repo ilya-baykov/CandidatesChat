@@ -1,5 +1,9 @@
+import logging
+
 from core.integrations.oko.enums import CandidateStatusEnum
 from core.integrations.oko.repositories.candidate_repository import OkoCandidateRepository
+
+logger = logging.getLogger(__name__)
 
 
 class OkoCandidateStatusService:

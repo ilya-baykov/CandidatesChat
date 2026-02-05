@@ -1,5 +1,9 @@
+import logging
+
 from core.integrations.oko.enums import CandidateStatusEnum
 from core.integrations.oko.db.db_client import OkoDBClient
+
+logger = logging.getLogger(__name__)
 
 
 class OkoCandidateRepository:
@@ -9,15 +13,16 @@ class OkoCandidateRepository:
 
     @staticmethod
     def update_status(*, candidate_id: int, status: CandidateStatusEnum) -> None:
+        """
+        Обновляет статус кандидата в БД ОКО.
+        """
+        logger.info(
+            "Обновление статуса кандидата в ОКО | candidate_id=%s | status=%s",
+            candidate_id,
+            status.name,
+        )
+
         with OkoDBClient.cursor() as cursor:
-            """
-            Обновляет статус кандидата в БД ОКО.
-
-            :param candidate_id: ID кандидата в системе ОКО
-            :param status: новый статус кандидата (CandidateStatusEnum)
-
-            :raises DatabaseError: при проблемах с выполнением SQL
-            """
             cursor.execute(
                 """
                 UPDATE public.candidates
@@ -26,3 +31,9 @@ class OkoCandidateRepository:
                 """,
                 [int(status), candidate_id],
             )
+
+        logger.debug(
+            "SQL UPDATE выполнен успешно | candidate_id=%s | status_id=%s",
+            candidate_id,
+            int(status),
+        )
