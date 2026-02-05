@@ -98,9 +98,9 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": os.getenv("POSTGRES_HOST", "localhost"),
         "PORT": os.getenv("POSTGRES_PORT", "5432"),
-        # "OPTIONS": {
-        #     "options": "-c search_path=candidateschat"
-        # }
+        "OPTIONS": {
+            "options": "-c search_path=candidateschat"
+        }
     }
 }
 # ---------------------------------------------------------------------
@@ -231,3 +231,4 @@ SPECTACULAR_SETTINGS = {
     # аккуратные enum / null
     "ENUM_NAME_OVERRIDES": {},
 }
+# CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', "").split(',')

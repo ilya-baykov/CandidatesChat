@@ -1,5 +1,5 @@
 from typing import Literal, TypeAlias
-from enum import Enum
+from enum import Enum, IntEnum
 
 
 class AnswerCodes(Enum):

@@ -10,6 +10,6 @@ class AnswerValidationResult:
     """
 
     is_correct: bool  # Корректность ответа
-    reply_message: Optional[str] = None  # Ответное сообщение
+    reply_message: Optional[str]  # Ответное сообщение
     score: Optional[float] = None  # Оценка ответа
     justification: Optional[str] = None  # Описание

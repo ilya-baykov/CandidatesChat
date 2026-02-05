@@ -3,6 +3,7 @@ import logging
 from celery import shared_task
 from django.db import transaction
 
+from core.integrations.oko.services.candidate_status_service import OkoCandidateStatusService
 from ..collections import AnswerCodes
 from ..models import Interview, InterviewQuestion
 from ..services.answer_processing import InterviewAnswerProcessingService
@@ -37,5 +38,6 @@ def run_ai_validation_task(*,
 
     except Exception as e:
         QuestionService.mark_status(question=question, code=AnswerCodes.FAILED_VALIDATION)
+        OkoCandidateStatusService.mark_interview_error(candidate_id=interview.candidate_id)
         logger.error(f"Ошибка:{e} при выполнении задачи run_ai_validation_task для "
                      f"Интервью:{interview_id}; Вопос:{question_id}")

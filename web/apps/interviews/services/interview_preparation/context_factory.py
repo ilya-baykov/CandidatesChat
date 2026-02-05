@@ -4,7 +4,7 @@ from typing import Optional
 from django.core.cache import cache
 from dataclasses import asdict
 from apps.interviews.services.interview_preparation.dto import CandidateContextDTO, VacancyContextDTO
-from core.integrations.oko.client import oko_client
+from core.integrations.oko.api.api_client import oko_client
 from core.utilities.pdf_extractor import PDFTextExtractor
 
 logger = logging.getLogger(__name__)

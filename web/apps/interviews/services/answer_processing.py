@@ -1,5 +1,6 @@
 import logging
 
+from core.integrations.oko.services.candidate_status_service import OkoCandidateStatusService
 from .ai_answer_validation.answer_validator import ai_answer_validator
 from .answers import AnswerService
 from .constants import INTERVIEW_SAVED_MESSAGE
@@ -87,7 +88,7 @@ class InterviewAnswerProcessingService:
             if validation_result.is_correct
             else AnswerCodes.REPEAT
         )
-        
+
         self.question_service.mark_status(question=self.question, code=next_status)
         logger.info(f"Статус вопроса обновлен для Интервью:{self.interview.pk}, Вопрос:{self.question.pk} "
                     f"Новый статус:{next_status}")
@@ -102,3 +103,5 @@ class InterviewAnswerProcessingService:
                 role_code=MessageRoleCodes.SYSTEM,
                 content=INTERVIEW_SAVED_MESSAGE,
             )
+            # Обновляем статус кандидата
+            OkoCandidateStatusService.mark_interview_passed(candidate_id=self.interview.candidate_id)
