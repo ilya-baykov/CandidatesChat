@@ -18,6 +18,8 @@ class InterviewAnswer(models.Model):
     answer_text = models.TextField(help_text="Текст ответа кандидата")
     score = models.FloatField(null=True, blank=True, help_text="Оценка ответа (будет от ИИ или админа)")
     answered_at = models.DateTimeField(default=timezone.now, help_text="Время ответа")
+    attempt_count = models.PositiveIntegerField(default=1, verbose_name="Количество попыток ответа",
+                                                help_text="Сколько раз кандидат отправлял ответ на этот вопрос")
 
     class Meta:
         verbose_name = "Ответ на вопрос"

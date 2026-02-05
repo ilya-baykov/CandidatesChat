@@ -15,13 +15,15 @@ class AnswerService:
                 "answer_text": answer_text,
                 "score": score,
                 "answered_at": timezone.now(),
+                "attempt_count": 1,
             },
         )
 
         if not created:
+            answer.attempt_count += 1
             answer.answer_text = answer_text
             answer.score = score
             answer.answered_at = timezone.now()
-            answer.save(update_fields=["answer_text", "score", "answered_at"])
+            answer.save(update_fields=["answer_text", "score", "answered_at", "attempt_count"])
 
         return answer

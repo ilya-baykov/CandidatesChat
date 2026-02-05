@@ -22,6 +22,7 @@ class InterviewAnswerProcessingService:
     - через Celery
     """
     AI_ANSWER_VALIDATOR = ai_answer_validator
+    MAX_ATTEMPTS = 3
 
     message_service = MessageService
     question_service = QuestionService
@@ -78,14 +79,14 @@ class InterviewAnswerProcessingService:
                 content=validation_result.reply_message)
             logger.debug(f"Отправлено сообщение от агента для Интервью:{self.interview.pk}, Вопрос:{self.question.pk}")
 
-        self.answer_service.save(
+        answer = self.answer_service.save(
             question=self.question,
             answer_text=answer_text,
             score=validation_result.score)
 
         next_status = (
             AnswerCodes.SCORED
-            if validation_result.is_correct
+            if validation_result.is_correct or answer.attempt_count >= self.MAX_ATTEMPTS
             else AnswerCodes.REPEAT
         )
 
