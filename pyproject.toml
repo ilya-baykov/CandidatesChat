@@ -24,7 +24,8 @@ dependencies = [
     "pytest-django (>=4.11.1,<5.0.0)",
     "django-admin-extra-buttons (>=2.1.2,<3.0.0)",
     "pdfplumber (>=0.11.9,<0.12.0)",
-    "drf-spectacular (>=0.29.0,<0.30.0)"
+    "drf-spectacular (>=0.29.0,<0.30.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)"
 ]
 
 
@@ -35,3 +36,4 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.base"
 pythonpath = ["web"]
+markers = ["slow: помечает тесты, которые выполняются долго"]

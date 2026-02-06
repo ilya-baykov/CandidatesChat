@@ -44,7 +44,6 @@ class InterviewFlowService:
             "is_processing": question and question.status.code == AnswerCodes.VALIDATING.value,
             "needs_repeat": question and question.status.code == AnswerCodes.REPEAT.value,
         }
-        print("get_state_for_display: ", context)
         return context
 
     def submit_answer(self, *, question: InterviewQuestion, answer_text: str) -> None:
