@@ -55,23 +55,3 @@ class FrontInterviewService:
         }
 
         return interview_summary
-
-    @staticmethod
-    def get_summary_by_token(token: str) -> FrontInterviewSummary:
-        """
-        Получение сводки по уникальному токену интервью.
-        Удобно для использования в API-эндпоинтах.
-        """
-
-        interview = get_object_or_404(Interview, token=token)
-        return FrontInterviewService.get_summary(interview)
-
-    @staticmethod
-    def get_summary_by_candidate_vacancy(candidate_id: int, vacancy_id: int) -> FrontInterviewSummary:
-        """
-        Получение сводки по паре candidate_id + vacancy_id.
-        Удобно для использования в API-эндпоинтах.
-        """
-
-        interview = get_object_or_404(Interview, candidate_id=candidate_id, vacancy_id=vacancy_id)
-        return FrontInterviewService.get_summary(interview)
