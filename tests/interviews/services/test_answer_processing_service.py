@@ -197,3 +197,22 @@ def test_advance_interview_if_needed_completes_interview_and_notifies_candidate(
     )
 
     mark_passed_mock.assert_called_once_with(candidate_id=service.interview.candidate_id)  # noqa
+
+
+def test_advance_interview_if_needed_does_nothing_if_not_completed(service, mocker):
+    """
+    Если интервью не завершено:
+    - сообщения не отправляются
+    - статус кандидата не меняется
+    """
+
+    service.interview_service.complete_if_done.return_value = False
+
+    mark_passed_mock = mocker.patch(
+        "apps.interviews.services.answer_processing.OkoCandidateStatusService.mark_interview_passed"
+    )
+
+    service._advance_interview_if_needed()
+
+    service.message_service.add_message.assert_not_called()
+    mark_passed_mock.assert_not_called()

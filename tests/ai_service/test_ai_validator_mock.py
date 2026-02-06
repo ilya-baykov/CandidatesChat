@@ -1,12 +1,5 @@
 from unittest.mock import Mock
-import pytest
-from apps.interviews.models import InterviewQuestion
 from apps.interviews.services.ai_answer_validation.answer_validator import AIAnswerValidator
-
-
-@pytest.fixture
-def fake_question():
-    return InterviewQuestion(question_text="Расскажите о своем опыте с Python?")
 
 
 def test_ai_validator_mock(fake_question):
