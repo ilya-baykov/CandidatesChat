@@ -1,8 +1,4 @@
 from unittest.mock import Mock
-
-import pytest
-
-from apps.interviews.models import Interview, InterviewQuestion, InterviewAnswer
 from apps.interviews.services.interviews import InterviewService
 
 def test_calculate_total_score_returns_average_from_orm(mocker):

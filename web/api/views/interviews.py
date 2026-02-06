@@ -8,8 +8,10 @@ from django.http import Http404
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 
 from api.exceptions import InterviewAlreadyExists, InterviewAlreadyExistsAPIException
-from api.serializers.interviews import InterviewCreateInputSerializer, InterviewDetailSerializer
+from api.serializers.interviews import InterviewCreateInputSerializer, InterviewDetailSerializer, \
+    FrontInterviewSummarySerializer
 from apps.interviews.models import Interview
+from apps.interviews.services.front.front_message_service import FrontInterviewService
 from apps.interviews.services.interview_preparation.interview_creation import InterviewCreationService
 from apps.interviews.services.interviews import InterviewService
 
@@ -170,4 +172,95 @@ class InterviewViewSet(viewsets.GenericViewSet):
             raise Http404("Интервью не найдено")
 
         serializer = InterviewDetailSerializer(interview)
+        return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[OpenApiParameter(
+            name="token",
+            type=str,
+            required=True,
+            description="UUID токена интервью",
+        )],
+        responses={200: FrontInterviewSummarySerializer},
+    )
+    @action(detail=False, methods=['GET'], url_path='summary')
+    def summary(self, request):
+        """
+        Получение итоговой сводки интервью для фронтенда.
+
+        Query-параметр:
+            token (обязательный) — UUID токена интервью
+
+        Возвращает:
+        • 200 OK + полная сводка интервью
+        • 400 Bad Request — если токен не передан или некорректный
+        • 404 Not Found — если интервью не найдено
+        """
+        token = request.query_params.get('token')
+        if not token:
+            raise ValidationError({'token': 'Параметр token обязателен'})
+
+        try:
+            uuid.UUID(token)
+        except ValueError:
+            raise ValidationError({'token': 'Некорректный формат UUID'})
+
+        interview = get_object_or_404(Interview, token=token)
+
+        summary_data = FrontInterviewService.get_summary(interview)
+        serializer = FrontInterviewSummarySerializer(summary_data)
+        return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="candidate_id",
+                type=int,
+                required=True,
+                description="ID кандидата (ОКО)",
+            ),
+            OpenApiParameter(
+                name="vacancy_id",
+                type=int,
+                required=True,
+                description="ID вакансии (ОКО)",
+            ),
+        ],
+        responses={200: FrontInterviewSummarySerializer},
+    )
+    @action(detail=False, methods=['GET'], url_path='summary-by-candidate-vacancy')
+    def summary_by_candidate_vacancy(self, request):
+        """
+        Получение итоговой сводки интервью для фронтенда
+        по паре candidate_id + vacancy_id.
+
+        Query-параметры (оба обязательны):
+            candidate_id — UUID кандидата
+            vacancy_id   — UUID вакансии
+
+        Возвращает:
+        • 200 OK + полная сводка интервью
+        • 400 Bad Request — если параметры отсутствуют или некорректны
+        • 404 Not Found — если интервью не найдено
+
+        Пример: GET /interviews/summary-by-candidate-vacancy/?candidate_id=123&vacancy_id=123
+        """
+        candidate_id = request.query_params.get('candidate_id')
+        vacancy_id = request.query_params.get('vacancy_id')
+
+        if not candidate_id or not vacancy_id:
+            raise ValidationError({'detail': 'Требуются параметры candidate_id и vacancy_id'})
+
+        # Получаем интервью через сервис
+        try:
+            interview = InterviewService.get_by_candidate_and_vacancy(
+                candidate_id=candidate_id,
+                vacancy_id=vacancy_id
+            )
+        except Interview.DoesNotExist:
+            raise Http404("Интервью не найдено")
+
+        # Получаем сводку через FrontInterviewService
+        summary_data = FrontInterviewService.get_summary(interview)
+        serializer = FrontInterviewSummarySerializer(summary_data)
         return Response(serializer.data)

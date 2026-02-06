@@ -37,3 +37,18 @@ class InterviewDetailSerializer(serializers.ModelSerializer):
             'total_score',
         ]
         read_only_fields = ['id', 'token', 'status', 'started_at', 'completed_at', 'total_score']
+
+
+class FrontInterviewSummarySerializer(serializers.Serializer):
+    """Сериализатор для сводки интервью в формате фронтенда."""
+    candidate_id = serializers.IntegerField()
+    vacancy_id = serializers.IntegerField()
+    current_status = serializers.CharField()
+    first_message_date = serializers.CharField(allow_null=True)
+    last_message_date = serializers.CharField(allow_null=True)
+    total_score = serializers.FloatField(allow_null=True)
+    started_at = serializers.CharField(allow_null=True)
+    completed_at = serializers.CharField(allow_null=True)
+    is_completed = serializers.BooleanField()
+    is_in_progress = serializers.BooleanField()
+    dialogue_history = serializers.ListField(child=serializers.DictField())
