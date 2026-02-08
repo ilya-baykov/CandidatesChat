@@ -40,7 +40,6 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
     "django_celery_results",
     "admin_extra_buttons",
-    # "django_celery_beat",
     "corsheaders",
 ]
 LOCAL_APPS = [
