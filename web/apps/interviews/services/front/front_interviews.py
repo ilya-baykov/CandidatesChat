@@ -1,9 +1,12 @@
+import logging
 from typing import Optional
 
 from django.db.models import Min, Max
 from datetime import datetime
 from ...collections import MessageRoleCodes, FrontDialogueMessage, FrontMessageRoleCodes, MessageDates
 from ...models import Interview, InterviewMessage
+
+logger = logging.getLogger(__name__)
 
 
 class FrontMessageService:
@@ -23,6 +26,9 @@ class FrontMessageService:
             .order_by("created_at")
         )
 
+        message_count = messages.count()
+        logger.debug("Найдено сообщений: %d для interview_id=%s", message_count, interview.pk)
+
         history: list[FrontDialogueMessage] = []
 
         for msg in messages.iterator():  # ленивая итерация, экономит память
@@ -38,7 +44,9 @@ class FrontMessageService:
                     created_at=msg.created_at.isoformat(),
                 )
             )
-
+        if logger.isEnabledFor(logging.DEBUG) and len(history) > 0:
+            logger.debug("Дата первого сообщения: %s | Последнего: %s",
+                         history[0].get('created_at'), history[-1].get('created_at'))
         return history
 
     @staticmethod
@@ -58,6 +66,12 @@ class FrontMessageService:
 
         first_dt: Optional[datetime] = agg_result["first"]
         last_dt: Optional[datetime] = agg_result["last"]
+
+        if first_dt is None and last_dt is None:
+            logger.debug("Сообщений не найдено для interview_id=%s", interview.pk)
+        else:
+            logger.debug("Диапазон дат: first=%s → last=%s (interview_id=%s)",
+                         first_dt.isoformat(), last_dt.isoformat(), interview.pk)
 
         # Преобразуем datetime → ISO-строку только если значение существует
         first_iso = first_dt.isoformat() if first_dt else None

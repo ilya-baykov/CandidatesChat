@@ -194,11 +194,16 @@ LOGGING = {
 
     "root": {
         "handlers": ["console"],
-        "level": os.getenv("LOG_LEVEL", "INFO"),
+        "level": os.getenv("LOG_LEVEL", "DEBUG"),
     },
 
     "loggers": {
         "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.server": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
