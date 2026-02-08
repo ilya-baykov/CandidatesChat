@@ -1,18 +1,19 @@
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
 from api.exceptions import InterviewNotFoundAPIException
 from apps.interviews.services.interviews import InterviewService
 from api.views.interviews.validators import Validator
 from apps.interviews.models import Interview
-from api.serializers.interviews import InterviewDetailSerializer
 
 
 class InterviewByTokenMixin:
     @staticmethod
     def get_interview_by_token(token: str) -> Interview:
         uuid_obj = Validator.validate_uuid(token)
-        return get_object_or_404(Interview, token=uuid_obj)
+        try:
+            return Interview.objects.get(token=uuid_obj)
+        except Interview.DoesNotExist:
+            raise InterviewNotFoundAPIException(token=token)
 
 
 class InterviewByCandidateVacancyMixin:

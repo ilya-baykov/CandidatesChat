@@ -77,7 +77,10 @@ class InterviewQueryViewSet(
 
     @extend_schema(
         parameters=[OpenApiParameter(name="token", type=str, required=True, description="UUID токена интервью")],
-        responses={200: InterviewDetailSerializer},
+        responses={
+            200: InterviewDetailSerializer,
+            404: OpenApiResponse(description="Интервью не найдено")
+        },
     )
     @action(detail=False, methods=["GET"], url_path="by-token")
     def by_token(self, request):
@@ -106,7 +109,8 @@ class InterviewQueryViewSet(
         ],
         responses={
             200: InterviewDetailSerializer,
-            404: OpenApiResponse(description="Интервью не найдено")},
+            404: OpenApiResponse(description="Интервью не найдено")
+        },
     )
     @action(detail=False, methods=["GET"], url_path="by-candidate-vacancy")
     def by_candidate_vacancy(self, request):
