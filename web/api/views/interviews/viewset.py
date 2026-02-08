@@ -104,7 +104,9 @@ class InterviewQueryViewSet(
             OpenApiParameter(name="candidate_id", type=int, required=True),
             OpenApiParameter(name="vacancy_id", type=int, required=True),
         ],
-        responses={200: InterviewDetailSerializer},
+        responses={
+            200: InterviewDetailSerializer,
+            404: OpenApiResponse(description="Интервью не найдено")},
     )
     @action(detail=False, methods=["GET"], url_path="by-candidate-vacancy")
     def by_candidate_vacancy(self, request):
@@ -142,7 +144,10 @@ class InterviewFrontViewSet(
 
     @extend_schema(
         parameters=[OpenApiParameter(name="token", type=str, required=True)],
-        responses={200: FrontInterviewSummarySerializer},
+        responses={
+            200: FrontInterviewSummarySerializer,
+            404: OpenApiResponse(description="Интервью не найдено")
+        },
     )
     @action(detail=False, methods=["GET"], url_path="summary")
     def summary(self, request):

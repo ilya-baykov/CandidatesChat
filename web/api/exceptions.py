@@ -56,3 +56,11 @@ class VacancyNotFoundAPIException(APIException):
             "detail": f"Вакансия с id={vacancy_id} не найдена",
             "vacancy_id": vacancy_id,
         }
+
+
+class InterviewNotFoundAPIException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_code = "interview_not_found"
+
+    def __init__(self, **kwargs):
+        self.detail = {"detail": f"Интервью не найдено; Параметры поиска:{kwargs}"}
