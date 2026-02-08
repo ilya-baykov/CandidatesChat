@@ -12,11 +12,6 @@ class InterviewByTokenMixin:
         uuid_obj = Validator.validate_uuid(token)
         return get_object_or_404(Interview, token=uuid_obj)
 
-    @staticmethod
-    def respond_with_interview(interview: Interview) -> Response:
-        serializer = InterviewDetailSerializer(interview)
-        return Response(serializer.data)
-
 
 class InterviewByCandidateVacancyMixin:
     @staticmethod

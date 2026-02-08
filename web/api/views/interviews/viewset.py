@@ -45,7 +45,7 @@ class InterviewCommandViewSet(viewsets.GenericViewSet):
         • 409 Bad Request - Интервью уже существует
         • 500 Internal Server Error - ошибка при создании интервью
         """
-        serializer = InterviewCreateInputSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         try:
@@ -76,9 +76,7 @@ class InterviewQueryViewSet(
     serializer_class = InterviewDetailSerializer
 
     @extend_schema(
-        parameters=[
-            OpenApiParameter(name="token", type=str, required=True, description="UUID токена интервью"),
-        ],
+        parameters=[OpenApiParameter(name="token", type=str, required=True, description="UUID токена интервью")],
         responses={200: InterviewDetailSerializer},
     )
     @action(detail=False, methods=["GET"], url_path="by-token")
@@ -98,7 +96,8 @@ class InterviewQueryViewSet(
         """
         token = request.query_params.get("token")
         interview = self.get_interview_by_token(token)
-        return self.respond_with_interview(interview)
+        serializer = self.get_serializer(interview)
+        return Response(serializer.data)
 
     @extend_schema(
         parameters=[
@@ -128,7 +127,8 @@ class InterviewQueryViewSet(
             request.query_params.get("vacancy_id"),
         )
         interview = self.get_interview_by_candidate_vacancy(c_id, v_id)
-        return self.respond_with_interview(interview)
+        serializer = self.get_serializer(interview)
+        return Response(serializer.data)
 
 
 class InterviewFrontViewSet(
@@ -136,9 +136,9 @@ class InterviewFrontViewSet(
     InterviewByCandidateVacancyMixin,
     viewsets.GenericViewSet,
 ):
-    """
-    Методы для фронтенда.
-    """
+    """Методы для фронтенда."""
+
+    serializer_class = FrontInterviewSummarySerializer
 
     @extend_schema(
         parameters=[OpenApiParameter(name="token", type=str, required=True)],
@@ -161,9 +161,8 @@ class InterviewFrontViewSet(
         Validator.validate_uuid(token)  # только валидация формата
         interview = self.get_interview_by_token(token)
         summary_data = FrontInterviewService.get_summary(interview)
-        return Response(FrontInterviewSummarySerializer(summary_data).data)
-
-    # ── SUMMARY BY CANDIDATE + VACANCY ───────────────────────
+        serializer = self.get_serializer(summary_data)
+        return Response(serializer.data)
 
     @extend_schema(
         parameters=[
@@ -195,4 +194,5 @@ class InterviewFrontViewSet(
         )
         interview = self.get_interview_by_candidate_vacancy(c_id, v_id)
         summary_data = FrontInterviewService.get_summary(interview)
-        return Response(FrontInterviewSummarySerializer(summary_data).data)
+        serializer = self.get_serializer(summary_data)
+        return Response(serializer.data)
