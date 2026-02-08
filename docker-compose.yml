@@ -23,8 +23,8 @@ services:
     env_file:
       - .env.local
     environment:
+      REDIS_URL: "redis://redis:6379/0"
       PYTHONPATH: /app/web
-      REDIS_URL: redis://redis:6379/0
     command: celery -A web.config worker -l info
 
 
