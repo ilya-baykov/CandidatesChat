@@ -3,20 +3,22 @@ import requests
 import logging
 from typing import Optional
 
+from core.integrations.oko.constants import OKO_BASE_URL
+
 logger = logging.getLogger(__name__)
 
 
 class OkoAPIClient:
     """Клиент для работы с API ОКО (вакансии, PDF-резюме кандидатов)."""
 
-    BASE_URL = os.getenv("OKO_BASE_URL", "https://oko.rt.ru/api")
+    BASE_URL_API = OKO_BASE_URL + "/api"
     HEADERS = {"Authorization": f"Basic {os.getenv('B64_CREDENTIALS')}"}
 
     def download_candidate_resume(self, candidate_id: int, target_path: str) -> bool:
         """
         Скачивает PDF-резюме кандидата.
         """
-        url = f"{self.BASE_URL}/candidates/{candidate_id}/pdf/download/"
+        url = f"{self.BASE_URL_API}/candidates/{candidate_id}/pdf/download/"
         try:
             logger.info("GET запрос (download resume): %s", url)
             response = requests.get(url, headers=self.HEADERS, stream=True, verify=False)
@@ -50,7 +52,7 @@ class OkoAPIClient:
         """
         Получает данные вакансии (search-template).
         """
-        url = f"{self.BASE_URL}/search-template/{vacancy_id}/"
+        url = f"{self.BASE_URL_API}/search-template/{vacancy_id}/"
         try:
             logger.info("GET запрос (vacancy): %s", url)
             response = requests.get(url, headers=self.HEADERS, verify=False)
