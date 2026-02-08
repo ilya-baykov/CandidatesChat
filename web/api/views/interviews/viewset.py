@@ -1,10 +1,9 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 
-from api.exceptions import InterviewAlreadyExistsAPIException, InterviewAlreadyExists, VacancyNotFound, \
-    CandidateNotFoundAPIException, CandidateNotFound, VacancyNotFoundAPIException
+from api.exceptions import *
 from api.serializers.interviews import *
 from apps.interviews.services.interview_preparation.interview_creation import InterviewCreationService
 from apps.interviews.services.front.front_message_service import FrontInterviewService
@@ -13,36 +12,10 @@ from .mixins import InterviewByTokenMixin, InterviewByCandidateVacancyMixin
 from .validators import Validator
 
 
-# TODO: Разделить InterviewViewSet
+class InterviewCommandViewSet(viewsets.GenericViewSet):
+    """Команды изменения/создания интервью."""
 
-class InterviewViewSet(
-    InterviewByTokenMixin,
-    InterviewByCandidateVacancyMixin,
-    viewsets.GenericViewSet,
-):
-    """
-    ViewSet для работы с интервью (service-to-service API, в основном для ОКО).
-
-    Поддерживаемые действия:
-    • POST /interviews/ - создание или возврат существующего интервью
-    • GET /interviews/by-token/ - получение по уникальному токену
-    • GET /interviews/by-candidate-vacancy/ - получение по candidate_id + vacancy_id
-
-    Примеры:
-        POST /interviews/
-        {"candidate_id": "1234","vacancy_id": "1234"}
-
-        GET /interviews/by-token/?token=12345
-        GET /interviews/by-candidate-vacancy/?candidate_id=1234&vacancy_id=1234
-    """
-    serializer_class = InterviewDetailSerializer
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return InterviewCreateInputSerializer
-        return InterviewDetailSerializer
-
-    # ── CREATE ───────────────────────────────────────────────
+    serializer_class = InterviewCreateInputSerializer
 
     @extend_schema(
         request=InterviewCreateInputSerializer,
@@ -92,7 +65,15 @@ class InterviewViewSet(
         output_serializer = InterviewDetailSerializer(interview)
         return Response(data=output_serializer.data, status=status.HTTP_201_CREATED)
 
-    # ── BY TOKEN ─────────────────────────────────────────────
+
+class InterviewQueryViewSet(
+    InterviewByTokenMixin,
+    InterviewByCandidateVacancyMixin,
+    viewsets.GenericViewSet,
+):
+    """Получение интервью."""
+
+    serializer_class = InterviewDetailSerializer
 
     @extend_schema(
         parameters=[
@@ -118,8 +99,6 @@ class InterviewViewSet(
         token = request.query_params.get("token")
         interview = self.get_interview_by_token(token)
         return self.respond_with_interview(interview)
-
-    # ── BY CANDIDATE + VACANCY ───────────────────────────────
 
     @extend_schema(
         parameters=[
@@ -151,7 +130,15 @@ class InterviewViewSet(
         interview = self.get_interview_by_candidate_vacancy(c_id, v_id)
         return self.respond_with_interview(interview)
 
-    # ── SUMMARY ──────────────────────────────────────────────
+
+class InterviewFrontViewSet(
+    InterviewByTokenMixin,
+    InterviewByCandidateVacancyMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    Методы для фронтенда.
+    """
 
     @extend_schema(
         parameters=[OpenApiParameter(name="token", type=str, required=True)],
