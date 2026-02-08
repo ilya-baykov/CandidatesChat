@@ -37,3 +37,19 @@ class OkoCandidateRepository:
             candidate_id,
             int(status),
         )
+
+    @staticmethod
+    def candidate_exists(candidate_id: int) -> bool:
+        logger.info("Проверка существования кандидата в ОКО | candidate_id=%s", candidate_id)
+
+        with OkoDBClient.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT 1
+                FROM public.candidates
+                WHERE id = %s
+                LIMIT 1
+                """,
+                [candidate_id],
+            )
+            return cursor.fetchone() is not None

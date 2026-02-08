@@ -3,7 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 
-from api.exceptions import InterviewAlreadyExistsAPIException, InterviewAlreadyExists
+from api.exceptions import InterviewAlreadyExistsAPIException, InterviewAlreadyExists, VacancyNotFound, \
+    CandidateNotFoundAPIException, CandidateNotFound, VacancyNotFoundAPIException
 from api.serializers.interviews import *
 from apps.interviews.services.interview_preparation.interview_creation import InterviewCreationService
 from apps.interviews.services.front.front_message_service import FrontInterviewService
@@ -47,6 +48,7 @@ class InterviewViewSet(
         request=InterviewCreateInputSerializer,
         responses={
             201: InterviewDetailSerializer,
+            404: OpenApiResponse(description="Кандидат или вакансия не найдены"),
             409: OpenApiResponse(description="Интервью уже существует"),
             400: OpenApiResponse(description="Ошибка валидации входных данных"),
             500: OpenApiResponse(description="Ошибка создания интервью"),
@@ -74,10 +76,16 @@ class InterviewViewSet(
         serializer.is_valid(raise_exception=True)
 
         try:
-            interview, created = InterviewCreationService.execute(
+            interview, _ = InterviewCreationService.execute(
                 candidate_id=serializer.validated_data["candidate_id"],
                 vacancy_id=serializer.validated_data["vacancy_id"],
             )
+        except CandidateNotFound as exc:
+            raise CandidateNotFoundAPIException(exc.candidate_id)
+
+        except VacancyNotFound as exc:
+            raise VacancyNotFoundAPIException(exc.vacancy_id)
+
         except InterviewAlreadyExists as exc:
             raise InterviewAlreadyExistsAPIException(exc.interview)
 

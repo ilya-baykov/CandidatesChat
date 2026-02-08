@@ -50,3 +50,19 @@ class OkoVacancyRepository:
                    "main_responsibilities", "required_experience", "software_knowledge", "wishes_prompt")
 
         return OkoVacancyRow(**dict(zip(columns, row)))
+
+    @staticmethod
+    def vacancy_exists(vacancy_id: int) -> bool:
+        logger.info("Проверка существования вакансии в ОКО | vacancy_id=%s", vacancy_id)
+
+        with OkoDBClient.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT 1
+                FROM public.candidate_search
+                WHERE id = %s
+                LIMIT 1
+                """,
+                [vacancy_id],
+            )
+            return cursor.fetchone() is not None
