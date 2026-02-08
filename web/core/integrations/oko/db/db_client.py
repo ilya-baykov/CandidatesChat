@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import contextmanager
 from django.db import connection
 
@@ -25,8 +26,8 @@ class OkoDBClient:
         try:
             with connection.cursor() as cursor:
                 yield cursor
-        except Exception:
-            logger.exception("Ошибка при работе с cursor БД ОКО")
+        except Exception as e:
+            logger.exception(f"Ошибка при работе с cursor БД ОКО:{e}")
             raise
         finally:
             logger.debug("Закрытие cursor БД ОКО")
