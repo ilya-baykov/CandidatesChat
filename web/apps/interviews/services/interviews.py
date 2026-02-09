@@ -1,3 +1,5 @@
+import logging
+
 from django.utils import timezone
 from django.db import models
 
@@ -5,6 +7,8 @@ from ..collections import InterviewCodes
 from ..models import Interview, InterviewAnswer
 from ..services.questions import QuestionService
 from ...reference.models import InterviewStatus
+
+logger = logging.getLogger(__name__)
 
 
 class InterviewService:
@@ -14,6 +18,7 @@ class InterviewService:
     def complete_if_done(interview: Interview) -> bool:
         """Завершает интервью, если все вопросы answered."""
         if not QuestionService.get_current(interview):
+
             interview.total_score = InterviewService._calculate_total_score(interview)
             interview.status = InterviewStatus.objects.get(code=InterviewCodes.COMPLETED)
             interview.completed_at = timezone.now()
@@ -51,4 +56,5 @@ class InterviewService:
         """Вычисляет средний score всех ответов интервью."""
         answers = InterviewAnswer.objects.filter(interview_question__interview=interview, score__isnull=False)
         avg_score = answers.aggregate(avg_score=models.Avg('score'))['avg_score']
+        logger.debug(f"Для interview={interview.pk}; Количество ответов-{answers.count()} avg_score={avg_score}")
         return avg_score or 0.0
