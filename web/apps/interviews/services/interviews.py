@@ -18,7 +18,6 @@ class InterviewService:
     def complete_if_done(interview: Interview) -> bool:
         """Завершает интервью, если все вопросы answered."""
         if not QuestionService.get_current(interview):
-
             interview.total_score = InterviewService._calculate_total_score(interview)
             interview.status = InterviewStatus.objects.get(code=InterviewCodes.COMPLETED)
             interview.completed_at = timezone.now()
