@@ -1,4 +1,48 @@
 services:
+  web:
+    build: .
+    image: chat_web
+    container_name: chat_web
+    ports:
+      - "8000:82"          # хост:контейнер
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env.docker
+    environment:
+      PYTHONPATH: /app
+    entrypoint: [ "/app/entrypoint.sh" ]
+    command: python /app/web/manage.py runserver 0.0.0.0:82
+
+  db:
+    image: postgres:15
+    container_name: chat_db
+    env_file:
+      - .env.docker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10          # больше попыток — надёжнее при первом запуске
+      start_period: 10s    # даёт postgres 10 секунд "на разогрев" до начала проверок
+    ports:
+      - "5433:5432"   # хост 5433 → контейнер 5432
+
+
+  adminer:
+    image: adminer:latest
+    container_name: chat_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"                       #8080 внутри контейнера
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: pepa-linha        # опционально — красивая тема
+    depends_on:
+      - db
 
 
   redis:
@@ -20,17 +64,17 @@ services:
     container_name: chat_worker
     depends_on:
       - redis
+      - db
     env_file:
-      - .env.local
+      - .env.docker
     environment:
-      REDIS_URL: "redis://redis:6379/0"
       PYTHONPATH: /app/web
+      REDIS_URL: redis://redis:6379/0
     command: celery -A web.config worker -l info
 
 
 
 
 volumes:
+  pgdata:
   redisdata:
-
-

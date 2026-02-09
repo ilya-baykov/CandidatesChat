@@ -18,10 +18,12 @@ class InterviewService:
     def complete_if_done(interview: Interview) -> bool:
         """Завершает интервью, если все вопросы answered."""
         if not QuestionService.get_current(interview):
+            logger.info(f"Завершение интервью")
             interview.total_score = InterviewService._calculate_total_score(interview)
             interview.status = InterviewStatus.objects.get(code=InterviewCodes.COMPLETED)
             interview.completed_at = timezone.now()
             interview.save(update_fields=["status", "completed_at", "total_score"])
+            logger.info(f"Обновленные параметры для interview:{interview}")
             return True
         return False
 
@@ -53,7 +55,7 @@ class InterviewService:
     @staticmethod
     def _calculate_total_score(interview: Interview) -> float:
         """Вычисляет средний score всех ответов интервью."""
-        answers = InterviewAnswer.objects.filter(interview_question__interview=interview, score__isnull=False)
+        answers = InterviewAnswer.objects.filter(interview_question__interview_id=interview, score__isnull=False)
         avg_score = answers.aggregate(avg_score=models.Avg('score'))['avg_score']
-        logger.debug(f"Для interview={interview.pk}; Количество ответов-{answers.count()} avg_score={avg_score}")
+        logger.info(f"Для interview={interview.pk}; Количество ответов-{answers.count()} avg_score={avg_score}")
         return avg_score or 0.0
