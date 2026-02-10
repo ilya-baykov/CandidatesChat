@@ -4,8 +4,10 @@ from api.exceptions import InterviewAlreadyExists, CandidateNotFound, VacancyNot
 from apps.reference.models import InterviewStatus
 from core.integrations.oko.repositories.candidate_repository import OkoCandidateRepository
 from core.integrations.oko.repositories.vacancy_repository import OkoVacancyRepository
+from ..constants import INTERVIEW_GREETING_MESSAGE
+from ..message_service import MessageService
 from ...models import Interview
-from ...collections import InterviewCodes
+from ...collections import InterviewCodes, MessageRoleCodes
 from ...tasks.triggers import start_generate_questions
 
 
@@ -34,6 +36,10 @@ class InterviewCreationService:
             # Если не создавали новое интервью
             if not created:
                 raise InterviewAlreadyExists(interview)
+
+            # Добавляем приветственное сообщение сразу после создания
+            MessageService.add_message(interview=interview, role_code=MessageRoleCodes.SYSTEM,
+                                       content=INTERVIEW_GREETING_MESSAGE)
 
             # Если создали — запускаем генерацию вопросов после коммита
             transaction.on_commit(
