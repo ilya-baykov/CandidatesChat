@@ -71,18 +71,19 @@ class InterviewAnswerProcessingService:
 
     def _apply_validation_result(self, *, answer_text: str, validation_result) -> None:
         """Применяет результат AI-валидации."""
-        if validation_result.reply_message:
+
+        # Сохраняем ответ полльзователя
+        answer = self.answer_service.save(question=self.question, answer_text=answer_text,
+                                          score=validation_result.score)
+
+        # Отправляем ответ пользователю
+        if validation_result.reply_message and answer.attempt_count < self.MAX_ATTEMPTS:
             self.message_service.add_message(
                 interview=self.interview,
                 question=self.question,
                 role_code=MessageRoleCodes.AGENT,
                 content=validation_result.reply_message)
             logger.debug(f"Отправлено сообщение от агента для Интервью:{self.interview.pk}, Вопрос:{self.question.pk}")
-
-        answer = self.answer_service.save(
-            question=self.question,
-            answer_text=answer_text,
-            score=validation_result.score)
 
         next_status = (
             AnswerCodes.SCORED
