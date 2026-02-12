@@ -156,7 +156,12 @@ body {
     font-weight: bold;
     animation: dots 1.4s steps(4, end) infinite;
 }
-
+.chat-divider {
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+    margin: 10px 0 15px;
+}
 @keyframes dots {
     0%, 20%   { content: ".";  }
     40%       { content: ".."; }
