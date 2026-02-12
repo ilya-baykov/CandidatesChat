@@ -46,6 +46,7 @@ class AIQuestionGenerator(QuestionGenerator):
             logger.debug(f"Попытка {attempt}: отправка запроса к AI")
 
             raw_text = self.client.get_answer(prompt)
+            logger.info(f"AI_raw_text:{raw_text}")
             data = JsonExtractor.extract_json(raw_text)
 
             if not data:
@@ -68,7 +69,7 @@ class AIQuestionGenerator(QuestionGenerator):
                         )
                     )
                 except (KeyError, ValueError, TypeError):
-                    logger.warning("Невалидный элемент вопроса от AI")
+                    logger.warning(f"Невалидный элемент вопроса от AI; item={item}")
                     continue
 
             if result:

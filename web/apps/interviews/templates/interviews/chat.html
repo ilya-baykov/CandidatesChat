@@ -18,10 +18,7 @@
 
     <div class="chat-messages" id="messages">
         {% for msg in messages %}
-            {% if forloop.first %}
-                <div class="chat-divider">Начало интервью</div>
-            {% endif %}
-            <div class="message-row {{ msg.role.code }}">
+            <div class="message-row {{ msg.role.code }}{% if forloop.first %} first-message{% endif %}">
                 <div class="message-bubble">
                     {{ msg.content }}
                 </div>

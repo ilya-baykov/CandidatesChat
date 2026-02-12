@@ -156,11 +156,17 @@ body {
     font-weight: bold;
     animation: dots 1.4s steps(4, end) infinite;
 }
-.chat-divider {
-    text-align: center;
-    font-size: 12px;
-    color: #777;
-    margin: 10px 0 15px;
+/* Первое сообщение — более заметный / мягкий оттенок */
+.message-row.first-message .message-bubble {
+    background: #5a0eb8;          /* чуть светлее и ярче основного #4B0082 */
+    border: 1px solid #7a3dd1;    /* тонкая светлая обводка — опционально */
+    box-shadow: 0 2px 8px rgba(90, 14, 184, 0.25); /* лёгкая тень */
+}
+
+/* Можно ещё сделать текст чуть жирнее или крупнее */
+.message-row.first-message .message-bubble {
+    font-weight: 500;
+    /* или font-size: 15px; — если хочешь ещё больше выделить */
 }
 @keyframes dots {
     0%, 20%   { content: ".";  }
