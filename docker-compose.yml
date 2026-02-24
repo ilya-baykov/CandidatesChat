@@ -1,19 +1,19 @@
 services:
-  web:
-    build: .
-    image: chat_web
-    container_name: chat_web
-    ports:
-      - "8000:82"          # хост:контейнер
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file:
-      - .env.docker
-    environment:
-      PYTHONPATH: /app
-    entrypoint: [ "/app/entrypoint.sh" ]
-    command: python /app/web/manage.py runserver 0.0.0.0:82
+#  web:
+#    build: .
+#    image: chat_web
+#    container_name: chat_web
+#    ports:
+#      - "8000:82"          # хост:контейнер
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#    env_file:
+#      - .env.docker
+#    environment:
+#      PYTHONPATH: /app
+#    entrypoint: [ "/app/entrypoint.sh" ]
+#    command: python /app/web/manage.py runserver 0.0.0.0:82
 
   db:
     image: postgres:15

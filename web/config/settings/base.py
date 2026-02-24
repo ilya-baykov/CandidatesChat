@@ -8,7 +8,7 @@ LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # # Загружаем .env.local
-# load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.local")
+load_dotenv(dotenv_path=r"C:\Users\ilya_\PycharmProjects\CandidatesChat\.env.docker")
 
 # ---------------------------------------------------------------------
 # Core
@@ -235,4 +235,4 @@ SPECTACULAR_SETTINGS = {
     # аккуратные enum / null
     "ENUM_NAME_OVERRIDES": {},
 }
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', "").split(',')
+# CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', "").split(',')
