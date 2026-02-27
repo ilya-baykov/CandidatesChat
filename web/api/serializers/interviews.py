@@ -3,6 +3,11 @@ from rest_framework import serializers
 from apps.interviews.models import Interview
 
 
+class QuestionInputSerializer(serializers.Serializer):
+    order = serializers.IntegerField(min_value=1)
+    text = serializers.CharField(min_length=1, max_length=2000)
+
+
 class InterviewCreateInputSerializer(serializers.Serializer):
     """
     Входной сериализатор для эндпоинта создания/поиска интервью (POST /interviews/).
@@ -10,6 +15,12 @@ class InterviewCreateInputSerializer(serializers.Serializer):
     """
     candidate_id = serializers.IntegerField(help_text="ID кандидата из системы ОКО")
     vacancy_id = serializers.IntegerField(help_text="ID вакансии из системы ОКО")
+    questions = QuestionInputSerializer(many=True, required=False, default=None)
+
+    def validate_questions(self, value):  # noqa
+        if value and len(value) > 10:
+            raise serializers.ValidationError("Нельзя передать более 10 вопросов.")
+        return value
 
 
 class InterviewDetailSerializer(serializers.ModelSerializer):
