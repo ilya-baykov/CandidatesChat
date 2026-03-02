@@ -5,8 +5,11 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParamet
 
 from api.exceptions import *
 from api.serializers.interviews import *
+from apps.interviews.services.ai_question_generation.dto import GeneratedQuestion
 from apps.interviews.services.interview_preparation.interview_creation import InterviewCreationService
 from apps.interviews.services.front.front_message_service import FrontInterviewService
+from apps.interviews.services.interview_preparation.questions_strategies import PredefinedQuestionProvisionStrategy, \
+    AIQuestionProvisionStrategy
 
 from .mixins import InterviewByTokenMixin, InterviewByCandidateVacancyMixin
 from .validators import Validator
@@ -48,10 +51,18 @@ class InterviewCommandViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        raw_questions = serializer.validated_data.get("questions")
+        if raw_questions:
+            questions = [GeneratedQuestion(order=q["order"], text=q["text"]) for q in raw_questions]
+            strategy = PredefinedQuestionProvisionStrategy(questions=questions)
+        else:
+            strategy = AIQuestionProvisionStrategy()
+
         try:
             interview, _ = InterviewCreationService.execute(
                 candidate_id=serializer.validated_data["candidate_id"],
                 vacancy_id=serializer.validated_data["vacancy_id"],
+                strategy=strategy
             )
         except CandidateNotFound as exc:
             raise CandidateNotFoundAPIException(exc.candidate_id)

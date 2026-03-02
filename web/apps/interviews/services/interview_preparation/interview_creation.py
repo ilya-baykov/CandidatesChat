@@ -4,6 +4,7 @@ from api.exceptions import InterviewAlreadyExists, CandidateNotFound, VacancyNot
 from apps.reference.models import InterviewStatus
 from core.integrations.oko.repositories.candidate_repository import OkoCandidateRepository
 from core.integrations.oko.repositories.vacancy_repository import OkoVacancyRepository
+from .questions_strategies import QuestionProvisionStrategy, AIQuestionProvisionStrategy
 from ..constants import INTERVIEW_GREETING_MESSAGE
 from ..message_service import MessageService
 from ...models import Interview
@@ -21,7 +22,9 @@ class InterviewCreationService:
     """
 
     @staticmethod
-    def execute(*, candidate_id: int, vacancy_id: int, questions_count: int = 5) -> tuple[Interview, bool]:
+    def execute(*, candidate_id: int,
+                vacancy_id: int,
+                strategy: QuestionProvisionStrategy) -> tuple[Interview, bool]:
 
         # Проверяем внешние сущности (бизнес-инварианты)
         InterviewCreationService._validate_external_entities(candidate_id=candidate_id, vacancy_id=vacancy_id)
@@ -42,12 +45,7 @@ class InterviewCreationService:
                                        content=INTERVIEW_GREETING_MESSAGE)
 
             # Если создали — запускаем генерацию вопросов после коммита
-            transaction.on_commit(
-                lambda: start_generate_questions(
-                    interview_id=interview.pk,
-                    questions_count=questions_count,
-                )
-            )
+            strategy.provision(interview)
 
         return interview, created
 
