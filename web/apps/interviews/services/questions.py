@@ -1,4 +1,5 @@
 from .ai_question_generation.dto import GeneratedQuestion
+from .constants import CONSENT_POSITIVE, CONSENT_NEGATIVE
 from .interviews import InterviewService
 from ..models import Interview, InterviewQuestion
 from ...reference.models import AnswerStatus
@@ -7,6 +8,8 @@ from ..collections import AnswerCodes, AnswerCodeLiteral, InterviewCodes
 
 class QuestionService:
     """Сервис для работы с вопросами интервью."""
+
+    CONSENT_ORDER = -1
 
     @staticmethod
     def get_next(interview: Interview) -> InterviewQuestion | None:
@@ -49,3 +52,22 @@ class QuestionService:
             InterviewService.set_status(interview=interview, status_code=InterviewCodes.IN_PROGRESS)
         except Exception as e:
             InterviewService.mark_as_failed_precondition(interview)
+
+    @staticmethod
+    def is_consent_question(question: InterviewQuestion) -> bool:
+        """Вопрос о согласии определяется исключительно по порядку."""
+        return question.order == QuestionService.CONSENT_ORDER
+
+    @staticmethod
+    def check_consent_answer(answer_text: str) -> bool | None:
+        """
+        True  — согласие
+        False — отказ
+        None  — непонятно, повторить вопрос
+        """
+        normalized = answer_text.lower().strip()
+        if any(word in normalized for word in CONSENT_POSITIVE):
+            return True
+        if any(word in normalized for word in CONSENT_NEGATIVE):
+            return False
+        return None

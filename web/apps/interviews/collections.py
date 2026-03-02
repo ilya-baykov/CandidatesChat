@@ -17,6 +17,7 @@ class InterviewCodes:
     COMPLETED = "completed"
     FAILED_PRECONDITION = "failed_precondition"
     PENDING_QUESTIONS = "pending_questions"
+    CONSENT_DECLINED = "consent_declined"
 
 
 class MessageRoleCodes:

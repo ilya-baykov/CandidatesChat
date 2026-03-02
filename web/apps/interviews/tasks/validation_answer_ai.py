@@ -7,6 +7,7 @@ from core.integrations.oko.services.candidate_status_service import OkoCandidate
 from ..collections import AnswerCodes
 from ..models import Interview, InterviewQuestion
 from ..services.answer_processing import InterviewAnswerProcessingService
+from ..services.consent_processing_service import ConsentProcessingService
 from ..services.interview_preparation.context_factory import InterviewContextFactory
 from ..services.questions import QuestionService
 
@@ -24,8 +25,14 @@ def run_ai_validation_task(*,
                 f"Интервью:{interview_id}; Вопрос:{question_id}")
 
     interview = Interview.objects.get(id=interview_id)
-    vacancy = InterviewContextFactory.build_vacancy(interview.vacancy_id)
     question = InterviewQuestion.objects.get(id=question_id)
+
+    # Проверка согласия на обработку
+    if QuestionService.is_consent_question(question):
+        ConsentProcessingService(interview=interview, question=question).process(answer_text)
+        return
+
+    vacancy = InterviewContextFactory.build_vacancy(interview.vacancy_id)
     processor = InterviewAnswerProcessingService(interview=interview, question=question, vacancy=vacancy)
 
     try:
