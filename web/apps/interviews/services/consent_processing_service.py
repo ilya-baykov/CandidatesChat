@@ -3,7 +3,7 @@ import logging
 from apps.interviews.collections import AnswerCodes, InterviewCodes, MessageRoleCodes
 from apps.interviews.models import Interview, InterviewQuestion
 from apps.interviews.services.answers import AnswerService
-from apps.interviews.services.constants import CONSENT_REPEAT_MESSAGE
+from apps.interviews.services.constants import CONSENT_REPEAT_MESSAGE, CONSENT_DECLINE_MESSAGE
 from apps.interviews.services.interviews import InterviewService
 from apps.interviews.services.message_service import MessageService
 from apps.interviews.services.questions import QuestionService
@@ -27,7 +27,7 @@ class ConsentProcessingService:
     чтобы поддерживать единый conversational flow.
     """
 
-    MAX_ATTEMPTS = 3
+    MAX_ATTEMPTS = 5
 
     answer_service = AnswerService
     message_service = MessageService
@@ -60,6 +60,9 @@ class ConsentProcessingService:
         # Проверка отказа от собеседования
         self._handle_decline(validation)
 
+        # Проверка лимитов
+        self._handle_attempt_limit(answer, validation)
+
         logger.info(f"Интервью:{self.interview.pk} — consent обработан.")
 
     def _validate(self, answer_text: str) -> dict:
@@ -68,7 +71,7 @@ class ConsentProcessingService:
         if isinstance(result, bool):
             return {
                 "is_correct": True,
-                "score": 1 if result else 0,
+                "score": 100 if result else 0,
                 "reply_message": None,
                 "is_declined": result is False,
             }
@@ -108,4 +111,23 @@ class ConsentProcessingService:
             self.interview_service.set_status(self.interview, InterviewCodes.CONSENT_DECLINED)
 
             # Обновляем статус кандидата
+            OkoCandidateStatusService.mark_interview_refusal(candidate_id=self.interview.candidate_id)
+
+    def _handle_attempt_limit(self, answer, validation: dict) -> None:
+        """
+        Неявный отказ — исчерпание попыток.
+        """
+
+        if not validation["is_correct"] and (answer.attempt_count + 1) >= self.MAX_ATTEMPTS:
+            logger.info(f"Интервью:{self.interview.pk} — исчерпаны попытки согласия")
+
+            # Optional: отдельный message
+            self.message_service.add_message(
+                interview=self.interview,
+                question=self.question,
+                role_code=MessageRoleCodes.AGENT,
+                content=CONSENT_DECLINE_MESSAGE,
+            )
+
+            self.interview_service.set_status(self.interview, InterviewCodes.CONSENT_DECLINED)
             OkoCandidateStatusService.mark_interview_refusal(candidate_id=self.interview.candidate_id)
