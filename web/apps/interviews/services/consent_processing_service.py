@@ -51,6 +51,9 @@ class ConsentProcessingService:
         # Сохраняем ответ кандидата (важно для анализа и attempt_count)
         answer = self.answer_service.save(question=self.question, answer_text=answer_text, score=validation["score"])
 
+        # Проверка лимитов
+        self._handle_attempt_limit(answer, validation)
+
         # Сохранение "Ответного" сообщения для пользователя
         self._handle_reply(answer, validation)
 
@@ -59,9 +62,6 @@ class ConsentProcessingService:
 
         # Проверка отказа от собеседования
         self._handle_decline(validation)
-
-        # Проверка лимитов
-        self._handle_attempt_limit(answer, validation)
 
         logger.info(f"Интервью:{self.interview.pk} — consent обработан.")
 
