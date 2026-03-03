@@ -7,6 +7,7 @@ from apps.interviews.services.constants import CONSENT_REPEAT_MESSAGE
 from apps.interviews.services.interviews import InterviewService
 from apps.interviews.services.message_service import MessageService
 from apps.interviews.services.questions import QuestionService
+from core.integrations.oko.services.candidate_status_service import OkoCandidateStatusService
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +105,7 @@ class ConsentProcessingService:
     def _handle_decline(self, validation: dict) -> None:
         if validation["is_declined"]:
             logger.info(f"Интервью:{self.interview.pk} — кандидат отказался от обработки данных")
-            self.interview_service.set_status(
-                self.interview,
-                InterviewCodes.CONSENT_DECLINED,
-            )
+            self.interview_service.set_status(self.interview, InterviewCodes.CONSENT_DECLINED)
+
+            # Обновляем статус кандидата
+            OkoCandidateStatusService.mark_interview_refusal(candidate_id=self.interview.candidate_id)

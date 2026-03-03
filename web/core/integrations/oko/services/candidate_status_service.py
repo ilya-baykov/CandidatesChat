@@ -32,3 +32,11 @@ class OkoCandidateStatusService:
             candidate_id=candidate_id,
             status=CandidateStatusEnum.INTERVIEW_ERROR,
         )
+
+    @staticmethod
+    def mark_interview_refusal(candidate_id: int) -> None:
+        """Помечает интервью кандидат как 'отказ'."""
+        OkoCandidateRepository.update_status(
+            candidate_id=candidate_id,
+            status=CandidateStatusEnum.REFUSAL_ERROR,
+        )

@@ -12,3 +12,4 @@ class CandidateStatusEnum(IntEnum):
     INTERVIEW_AWAIT = 6  # Ожидаем прохождение интервью
     INTERVIEW_PASSED = 7  # Интервью пройдено
     INTERVIEW_ERROR = 8  # Техническая ошибка
+    REFUSAL_ERROR = 9  # Отказ от интервью
