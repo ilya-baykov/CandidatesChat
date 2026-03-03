@@ -1,9 +1,7 @@
-from .ai_question_generation.dto import GeneratedQuestion
 from .constants import CONSENT_POSITIVE, CONSENT_NEGATIVE
-# from .interviews import InterviewService
 from ..models import Interview, InterviewQuestion
 from ...reference.models import AnswerStatus
-from ..collections import AnswerCodes, AnswerCodeLiteral, InterviewCodes
+from ..collections import AnswerCodes, AnswerCodeLiteral
 
 
 class QuestionService:
@@ -33,8 +31,6 @@ class QuestionService:
         code_value = code.value  # Получаем строковое значение кода
         question.status = AnswerStatus.objects.get(code=code_value)
         question.save(update_fields=["status"])
-
-
 
     @staticmethod
     def is_consent_question(question: InterviewQuestion) -> bool:
