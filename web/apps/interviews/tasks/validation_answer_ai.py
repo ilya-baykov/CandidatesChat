@@ -27,12 +27,6 @@ def run_ai_validation_task(*,
     interview = Interview.objects.get(id=interview_id)
     question = InterviewQuestion.objects.get(id=question_id)
 
-    # Проверка согласия на обработку
-    if QuestionService.is_consent_question(question):
-        logger.info(f"Работа с вопросом 'согласия на обработку'")
-        ConsentProcessingService(interview=interview, question=question).process(answer_text)
-        return
-
     vacancy = InterviewContextFactory.build_vacancy(interview.vacancy_id)
     processor = InterviewAnswerProcessingService(interview=interview, question=question, vacancy=vacancy)
 
