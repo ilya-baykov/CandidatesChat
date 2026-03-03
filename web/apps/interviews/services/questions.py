@@ -34,25 +34,7 @@ class QuestionService:
         question.status = AnswerStatus.objects.get(code=code_value)
         question.save(update_fields=["status"])
 
-    @staticmethod
-    def save_predefined(interview_id: int, questions: list[GeneratedQuestion]) -> None:
-        """Сохраняет готовые вопросы и переводит интервью в статус IN_PROGRESS."""
-        interview = Interview.objects.get(id=interview_id)
-        try:
-            default_status = AnswerStatus.objects.get_pending()
-            InterviewQuestion.objects.bulk_create([
-                InterviewQuestion(
-                    interview=interview,
-                    question_text=q.text,
-                    order=q.order,
-                    status=default_status,
-                )
-                for q in questions
-            ])
-            # InterviewService.set_status(interview=interview, status_code=InterviewCodes.IN_PROGRESS)
-        except Exception as e:
-            pass
-            # InterviewService.mark_as_failed_precondition(interview)
+
 
     @staticmethod
     def is_consent_question(question: InterviewQuestion) -> bool:

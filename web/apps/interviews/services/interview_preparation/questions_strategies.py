@@ -5,6 +5,7 @@ from django.db import transaction
 from apps.interviews.models import Interview, InterviewQuestion
 from apps.interviews.services.ai_question_generation.dto import GeneratedQuestion
 from apps.interviews.services.constants import CONSENT_QUESTION_TEXT
+from apps.interviews.services.interview_preparation.question_provision import QuestionProvisionService
 from apps.interviews.services.questions import QuestionService
 from apps.interviews.tasks.triggers import start_generate_questions
 from apps.reference.models import AnswerStatus
@@ -56,7 +57,7 @@ class PredefinedQuestionProvisionStrategy(QuestionProvisionStrategy):
 
     def _provision(self, interview: Interview) -> None:
         transaction.on_commit(
-            lambda: QuestionService.save_predefined(
+            lambda: QuestionProvisionService.run_predefined(
                 interview_id=interview.pk,
                 questions=self.questions,
             )
