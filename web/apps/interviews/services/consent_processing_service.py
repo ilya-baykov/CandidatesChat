@@ -1,33 +1,110 @@
 import logging
 
-from apps.interviews.collections import AnswerCodes, InterviewCodes
+from apps.interviews.collections import AnswerCodes, InterviewCodes, MessageRoleCodes
 from apps.interviews.models import Interview, InterviewQuestion
+from apps.interviews.services.answers import AnswerService
+from apps.interviews.services.constants import CONSENT_REPEAT_MESSAGE
 from apps.interviews.services.interviews import InterviewService
+from apps.interviews.services.message_service import MessageService
 from apps.interviews.services.questions import QuestionService
 
 logger = logging.getLogger(__name__)
 
 
 class ConsentProcessingService:
-    """Обработка ответа на вопрос о согласии."""
+    """
+    Use-case обработки ответа кандидата на вопрос о согласии на обработку данных.
+
+    Flow обработки:
+    1. Валидация ответа кандидата
+    2. Сохранение ответа
+    3. Формирование ответного сообщения (если требуется)
+    4. Обновление статуса вопроса
+    5. Обновление статуса интервью при отказе
+
+    Архитектурно сервис повторяет структуру AI-обработки ( InterviewAnswerProcessingService  ),
+    чтобы поддерживать единый conversational flow.
+    """
+
+    MAX_ATTEMPTS = 3
+
+    answer_service = AnswerService
+    message_service = MessageService
+    question_service = QuestionService
+    interview_service = InterviewService
 
     def __init__(self, interview: Interview, question: InterviewQuestion):
         self.interview = interview
         self.question = question
 
     def process(self, answer_text: str) -> None:
-        result = QuestionService.check_consent_answer(answer_text)
+        """
+        Основной сценарий обработки ответа кандидата.
+
+        Последовательность выполнения соответствует AI-процессору:
+        validation -> save -> reply -> status update -> side effects
+        """
+        # Проверка ответа
+        validation = self._validate(answer_text)
+
+        # Сохраняем ответ кандидата (важно для анализа и attempt_count)
+        answer = self.answer_service.save(question=self.question, answer_text=answer_text, score=validation["score"])
+
+        # Сохранение "Ответного" сообщения для пользователя
+        self._handle_reply(answer, validation)
+
+        # Обновление статуса вопроса
+        self._update_question_status(answer, validation)
+
+        # Проверка отказа от собеседования
+        self._handle_decline(validation)
+
+        logger.info(f"Интервью:{self.interview.pk} — consent обработан.")
+
+    def _validate(self, answer_text: str) -> dict:
+        result = self.question_service.check_consent_answer(answer_text)
 
         if isinstance(result, bool):
-            if result:
-                logger.info(f"Интервью:{self.interview.pk} — согласие получено")
-                QuestionService.mark_status(self.question, AnswerCodes.ANSWERED)
+            return {
+                "is_correct": True,
+                "score": 1 if result else 0,
+                "reply_message": None,
+                "is_declined": result is False,
+            }
 
-            else:
-                logger.info(f"Интервью:{self.interview.pk} — кандидат отказался от обработки данных")
-                QuestionService.mark_status(self.question, AnswerCodes.ANSWERED)
-                InterviewService.set_status(self.interview, InterviewCodes.CONSENT_DECLINED)
+        return {
+            "is_correct": False,
+            "score": 0,
+            "reply_message": CONSENT_REPEAT_MESSAGE,
+            "is_declined": False,
+        }
 
-        else:  # Если result - это None
-            logger.info(f"Интервью:{self.interview.pk} — ответ на consent неясен, повторяем")
-            QuestionService.mark_status(self.question, AnswerCodes.REPEAT)
+    def _handle_reply(self, answer, validation: dict) -> None:
+        if validation["reply_message"] and answer.attempt_count < self.MAX_ATTEMPTS:
+            self.message_service.add_message(
+                interview=self.interview,
+                question=self.question,
+                role_code=MessageRoleCodes.AGENT,
+                content=validation["reply_message"],
+            )
+
+    def _update_question_status(self, answer, validation: dict) -> None:
+        next_status = (
+            AnswerCodes.ANSWERED
+            if validation["is_correct"]
+               or answer.attempt_count >= self.MAX_ATTEMPTS
+            else AnswerCodes.REPEAT
+        )
+
+        self.question_service.mark_status(
+            question=self.question,
+            code=next_status,
+        )
+
+    def _handle_decline(self, validation: dict) -> None:
+        if validation["is_declined"]:
+            logger.info(f"Интервью:{self.interview.pk} — кандидат отказался от обработки данных")
+            self.interview_service.set_status(
+                self.interview,
+                InterviewCodes.CONSENT_DECLINED,
+            )

@@ -13,7 +13,7 @@ class InterviewQuestion(models.Model):
     question_text = models.TextField(help_text="Текст вопроса")
     status = models.ForeignKey(AnswerStatus, on_delete=models.PROTECT, related_name="questions",
                                help_text="Статус ответа на вопрос")
-    order = models.PositiveIntegerField(help_text="Порядок вопроса в интервью")
+    order = models.IntegerField(help_text="Порядок вопроса в интервью")
 
     class Meta:
         verbose_name = "Вопрос интервью"
