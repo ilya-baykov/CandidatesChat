@@ -1,6 +1,6 @@
 from .ai_question_generation.dto import GeneratedQuestion
 from .constants import CONSENT_POSITIVE, CONSENT_NEGATIVE
-from .interviews import InterviewService
+# from .interviews import InterviewService
 from ..models import Interview, InterviewQuestion
 from ...reference.models import AnswerStatus
 from ..collections import AnswerCodes, AnswerCodeLiteral, InterviewCodes
@@ -49,9 +49,10 @@ class QuestionService:
                 )
                 for q in questions
             ])
-            InterviewService.set_status(interview=interview, status_code=InterviewCodes.IN_PROGRESS)
+            # InterviewService.set_status(interview=interview, status_code=InterviewCodes.IN_PROGRESS)
         except Exception as e:
-            InterviewService.mark_as_failed_precondition(interview)
+            pass
+            # InterviewService.mark_as_failed_precondition(interview)
 
     @staticmethod
     def is_consent_question(question: InterviewQuestion) -> bool:

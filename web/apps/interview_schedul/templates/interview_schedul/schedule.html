@@ -1,0 +1,409 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: #E6E6FA;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.schedule-wrapper {
+  max-width: 720px;
+  margin: 28px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 16px 24px;
+  background: #4B0082;
+  border-bottom: 1px solid #000;
+}
+.chat-header__title    { font-size: 13px; color: #fff; margin-bottom: 2px; }
+.chat-header__subtitle { font-size: 18px; font-weight: 600; color: #fff; }
+
+.schedule-body { padding: 28px 24px 32px; }
+
+.step-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #4B0082;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.back-btn {
+  font-family: Inter, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4B0082;
+  background: none;
+  border: 1px solid #c9a8f0;
+  border-radius: 20px;
+  padding: 3px 12px;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.back-btn:hover { background: #4B0082; color: #fff; border-color: #4B0082; }
+
+.dates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.times-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.slot-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 8px;
+  background: #f3eeff;
+  border: 1.5px solid #c9a8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: Inter, Arial, sans-serif;
+  transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
+}
+.slot-btn:hover {
+  background: #e0ccff;
+  border-color: #4B0082;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(75,0,130,.15);
+}
+.slot-btn:active { transform: translateY(0); }
+
+.slot-btn__day   { font-size: 10px; font-weight: 700; color: #6a0dad; letter-spacing: .07em; text-transform: uppercase; }
+.slot-btn__date  { font-size: 17px; font-weight: 700; color: #2a0060; }
+.slot-btn__count { font-size: 11px; color: #999; }
+
+.slot-btn--time {
+  flex-direction: row;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2a0060;
+  min-width: 88px;
+  justify-content: center;
+}
+
+.slot-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #4B0082;
+  color: #fff;
+  border-radius: 10px;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 22px;
+}
+.slot-banner__icon { font-size: 18px; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 11px; font-weight: 600; color: #555;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.field input {
+  padding: 10px 13px;
+  border: 1.5px solid #c9a8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: Inter, Arial, sans-serif;
+  color: #000;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.field input:focus {
+  border-color: #4B0082;
+  box-shadow: 0 0 0 3px rgba(75,0,130,.1);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: #4B0082;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s;
+}
+.submit-btn:hover:not(:disabled) { background: #6a0dad; }
+.submit-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.form-notice {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #999;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.success-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px;
+  gap: 14px;
+  text-align: center;
+}
+.success-box__icon {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: #4B0082;
+  color: #fff;
+  font-size: 28px;
+  display: flex; align-items: center; justify-content: center;
+}
+.success-box__title { font-size: 22px; font-weight: 700; color: #2a0060; }
+.success-box__slot  {
+  font-size: 15px; font-weight: 600; color: #4B0082;
+  background: #f3eeff; border: 1.5px solid #c9a8f0;
+  border-radius: 10px; padding: 10px 24px;
+}
+.success-box__sub { font-size: 13px; color: #999; }
+
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  font-family: Inter, Arial, sans-serif;
+  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  opacity: 0; transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  z-index: 999;
+  max-width: 340px;
+}
+.toast.show    { opacity: 1; transform: translateY(0); }
+.toast.success { background: #4B0082; color: #fff; }
+.toast.error   { background: #c0392b; color: #fff; }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="schedule-wrapper">
+
+  <header class="chat-header">
+    <div class="chat-header__title">Интервью</div>
+    <div class="chat-header__subtitle">Запись на собеседование</div>
+  </header>
+
+  <div class="schedule-body">
+
+    <!-- Шаг 1: даты -->
+    <div id="step-date">
+      <div class="step-label">Выберите дату</div>
+      <div class="dates-grid" id="datesGrid"></div>
+    </div>
+
+    <!-- Шаг 2: время -->
+    <div id="step-time" style="display:none">
+      <div class="step-label">
+        Выберите время
+        <button class="back-btn" onclick="goTo('step-date','step-time')">← назад</button>
+      </div>
+      <div class="times-grid" id="timesGrid"></div>
+    </div>
+
+    <!-- Шаг 3: форма -->
+    <div id="step-form" style="display:none">
+      <div class="step-label">
+        Ваши данные
+        <button class="back-btn" onclick="goTo('step-time','step-form')">← назад</button>
+      </div>
+
+      <div class="slot-banner">
+        <span class="slot-banner__icon">📅</span>
+        <span id="bannerText"></span>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-name">Имя</label>
+          <input id="f-name" type="text" placeholder="Иван Петров" autocomplete="name" oninput="validate()">
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" type="email" placeholder="ivan@example.com" autocomplete="email" oninput="validate()">
+        </div>
+      </div>
+
+      <input type="hidden" id="f-slot">
+
+      <button class="submit-btn" id="submitBtn" disabled onclick="submitForm()">
+        Подтвердить запись
+      </button>
+
+      <p class="form-notice">
+        Детали встречи придут на ваш email · Рекрутер: <strong>{{ recruiter_email }}</strong>
+      </p>
+    </div>
+
+    <!-- Шаг 4: успех -->
+    <div id="step-success" style="display:none">
+      <div class="success-box">
+        <div class="success-box__icon">✓</div>
+        <div class="success-box__title">Готово!</div>
+        <div class="success-box__slot" id="successSlot"></div>
+        <div class="success-box__sub">Детали встречи отправлены на ваш email.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+(function () {
+  const ALL_SLOTS = {{ slots_json|safe }};
+
+  const byDate = {};
+  ALL_SLOTS.forEach(s => (byDate[s.date] ??= []).push(s));
+
+  const DAYS   = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const MON_SH = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const MON_GN = ['января','февраля','марта','апреля','мая','июня',
+                  'июля','августа','сентября','октября','ноября','декабря'];
+
+  let selectedDate = null;
+  let selectedSlot = null;
+
+  /* навигация */
+  window.goTo = function(showId, hideId) {
+    document.getElementById(hideId).style.display = 'none';
+    document.getElementById(showId).style.display = '';
+  };
+
+  /* кнопки дат */
+  Object.keys(byDate).sort().forEach(dateStr => {
+    const d   = new Date(dateStr + 'T00:00:00');
+    const n   = byDate[dateStr].length;
+    const sfx = n === 1 ? '' : n < 5 ? 'а' : 'ов';
+    const btn = document.createElement('button');
+    btn.className = 'slot-btn';
+    btn.innerHTML =
+      `<span class="slot-btn__day">${DAYS[d.getDay()]}</span>` +
+      `<span class="slot-btn__date">${d.getDate()} ${MON_SH[d.getMonth()]}</span>` +
+      `<span class="slot-btn__count">${n} слот${sfx}</span>`;
+    btn.onclick = () => {
+      selectedDate = dateStr;
+      renderTimes();
+      goTo('step-time', 'step-date');
+    };
+    document.getElementById('datesGrid').appendChild(btn);
+  });
+
+  /* кнопки времени */
+  function renderTimes() {
+    const grid = document.getElementById('timesGrid');
+    grid.innerHTML = '';
+    byDate[selectedDate].forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'slot-btn slot-btn--time';
+      btn.textContent = s.time;
+      btn.onclick = () => {
+        selectedSlot = s;
+        document.getElementById('f-slot').value = s.iso;
+        const d = new Date(selectedDate + 'T00:00:00');
+        document.getElementById('bannerText').textContent =
+          `${d.getDate()} ${MON_GN[d.getMonth()]} · ${s.time} МСК · Google Meet`;
+        goTo('step-form', 'step-time');
+        validate();
+      };
+      grid.appendChild(btn);
+    });
+  }
+
+  /* валидация */
+  window.validate = function () {
+    const name  = document.getElementById('f-name').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    document.getElementById('submitBtn').disabled =
+      !(name.length > 1 && /\S+@\S+\.\S+/.test(email) && selectedSlot);
+  };
+
+  /* сабмит */
+  window.submitForm = async function () {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Отправляем…';
+
+    const body = new URLSearchParams({
+      candidate_name:      document.getElementById('f-name').value.trim(),
+      candidate_email:     document.getElementById('f-email').value.trim(),
+      slot:                document.getElementById('f-slot').value,
+      csrfmiddlewaretoken: getCookie('csrftoken'),
+    });
+
+    try {
+      const res  = await fetch(window.location.href, { method: 'POST', body });
+      const data = await res.json();
+      if (data.ok) {
+        document.getElementById('successSlot').textContent = data.slot_label;
+        goTo('step-success', 'step-form');
+      } else {
+        showToast('Ошибка: ' + JSON.stringify(data.errors), 'error');
+        btn.disabled = false;
+        btn.textContent = 'Подтвердить запись';
+      }
+    } catch {
+      showToast('Сетевая ошибка, попробуйте ещё раз.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Подтвердить запись';
+    }
+  };
+
+  /* тост */
+  let tt;
+  function showToast(msg, type = 'success') {
+    clearTimeout(tt);
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `toast ${type} show`;
+    tt = setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
+  function getCookie(name) {
+    return document.cookie.split(';')
+      .map(c => c.trim().split('='))
+      .find(([k]) => k === name)?.[1] ?? '';
+  }
+})();
+</script>
+{% endblock %}

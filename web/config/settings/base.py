@@ -45,6 +45,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "api",
     "apps.interviews",
+    "apps.interview_schedul",
     "apps.reference",
 ]
 
