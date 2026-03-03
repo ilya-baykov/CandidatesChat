@@ -29,6 +29,7 @@ def run_ai_validation_task(*,
 
     # Проверка согласия на обработку
     if QuestionService.is_consent_question(question):
+        logger.info(f"Работа с вопросом 'согласия на обработку'")
         ConsentProcessingService(interview=interview, question=question).process(answer_text)
         return
 
