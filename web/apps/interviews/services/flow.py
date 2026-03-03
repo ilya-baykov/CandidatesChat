@@ -1,3 +1,4 @@
+from .interviews import InterviewService
 from .message_service import MessageService
 from .questions import QuestionService
 from ..collections import AnswerCodes, MessageRoleCodes
@@ -24,6 +25,13 @@ class InterviewFlowService:
         """
         Возвращает состояние интервью, готовое для отображения в UI.
         """
+        messages = self.interview.messages.select_related("role").order_by("created_at")  # noqa
+
+        # Проверка активности интервью
+        if not InterviewService.is_active(self.interview):
+            return {"current_question": None, "messages":
+                messages, "is_closed": True, "is_processing": False, "needs_repeat": False}
+
         question = self.question_service.get_current(self.interview)
 
         if question:

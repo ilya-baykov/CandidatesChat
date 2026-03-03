@@ -3,6 +3,7 @@ from django.views import View
 
 from apps.interviews.models import Interview, InterviewQuestion
 from apps.interviews.services.flow import InterviewFlowService
+from apps.interviews.services.interviews import InterviewService
 from apps.interviews.tasks.triggers import start_answer_validation
 
 
@@ -30,7 +31,6 @@ class CandidateInterviewView(View):
     def get(self, request, *args, **kwargs):
         interview = self.get_interview()
         flow = InterviewFlowService(interview=interview)
-
         state = flow.get_state_for_display()
         context = {
             "interview": interview,
@@ -39,10 +39,15 @@ class CandidateInterviewView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
+        interview = self.get_interview()
+
+        # Защита от отправки сообщений в закрытое интервью
+        if not InterviewService.is_active(interview):
+            return redirect(request.path)
+
         question_id = request.POST.get("question_id")
         answer_text = request.POST.get("answer_text", "").strip()
 
-        interview = self.get_interview()
         flow = InterviewFlowService(interview=interview)
 
         question = get_object_or_404(

@@ -59,3 +59,16 @@ class InterviewService:
         avg_score = answers.aggregate(avg_score=models.Avg('score'))['avg_score']
         logger.info(f"Для interview={interview.pk}; Количество ответов-{answers.count()} avg_score={avg_score}")
         return avg_score or 0.0
+
+    @staticmethod
+    def is_active(interview: Interview) -> bool:
+        """Возвращает активность интервью
+
+        Если активен - True
+        Иначе - False
+        """
+        return interview.status.code not in {
+            InterviewCodes.COMPLETED,
+            InterviewCodes.CONSENT_DECLINED,
+            InterviewCodes.FAILED_PRECONDITION,
+        }
