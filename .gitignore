@@ -10,3 +10,7 @@ venv/
 
 # Игнорировать папки логов
 logs/
+
+# Игнорирование секретов
+secrets/credentials.json
+secrets/token.json
