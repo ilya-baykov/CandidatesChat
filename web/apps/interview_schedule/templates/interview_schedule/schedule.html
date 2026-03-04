@@ -285,9 +285,11 @@ body {
         <div class="success-box__title">Готово!</div>
         <div class="success-box__slot" id="successSlot"></div>
         <div class="success-box__sub">Детали встречи отправлены на ваш email.</div>
+        <a href="{% url 'interviews:candidate_chat' token=token %}" class="back-to-chat">
+          ← Вернуться к чату
+        </a>
       </div>
     </div>
-
   </div>
 </div>
 

@@ -88,7 +88,11 @@ class ScheduleView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, token):
+
         candidate_email, candidate_name, recruiter_email = self._get_interview_context(token)
+
+        if InterviewSlot.objects.filter(candidate_email=candidate_email).exists():
+            return JsonResponse({"ok": False, "errors": "Вы уже записаны на собеседование"}, status=400)
 
         form = BookSlotForm(request.POST)
         if not form.is_valid():
