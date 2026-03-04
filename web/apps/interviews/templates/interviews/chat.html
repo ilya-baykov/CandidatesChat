@@ -42,9 +42,13 @@
             >Отправить</button>
         </form>
     {% else %}
-        <div class="chat-finished">
-            Интервью завершено 🎉
-        </div>
+    <div class="chat-finished">
+        Интервью завершено 🎉
+        {% if schedule_url %}
+            <p>Отлично! Вы успешно прошли первый этап — мы хотим пригласить вас на живую встречу с рекрутером. Выберите удобное время:</p>
+            <a href="{{ schedule_url }}" class="schedule-link">Записаться на собеседование →</a>
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 {% endblock %}

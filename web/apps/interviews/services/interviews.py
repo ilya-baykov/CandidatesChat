@@ -3,6 +3,8 @@ import logging
 from django.utils import timezone
 from django.db import models
 
+from core.integrations.oko.enums import CandidateStatusEnum
+from core.integrations.oko.repositories.candidate_repository import OkoCandidateRepository
 from ..collections import InterviewCodes
 from ..models import Interview, InterviewAnswer
 from ..services.questions import QuestionService
@@ -72,3 +74,8 @@ class InterviewService:
             InterviewCodes.CONSENT_DECLINED,
             InterviewCodes.FAILED_PRECONDITION,
         }
+
+    @staticmethod
+    def is_live_interview_invited(interview: Interview) -> bool:
+        candidate = OkoCandidateRepository.get_by_id(interview.candidate_id)
+        return bool(candidate and candidate["status_id"] == CandidateStatusEnum.LIVE_INTERVIEW_INVITE)

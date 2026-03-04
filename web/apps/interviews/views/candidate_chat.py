@@ -7,6 +7,7 @@ from apps.interviews.services.flow import InterviewFlowService
 from apps.interviews.services.interviews import InterviewService
 from apps.interviews.services.questions import QuestionService
 from apps.interviews.tasks.triggers import start_answer_validation
+from django.urls import reverse
 
 
 class CandidateInterviewView(View):
@@ -34,10 +35,16 @@ class CandidateInterviewView(View):
         interview = self.get_interview()
         flow = InterviewFlowService(interview=interview)
         state = flow.get_state_for_display()
-        context = {
-            "interview": interview,
-            **state,
-        }
+
+        context = {"interview": interview, **state}
+
+        if not InterviewService.is_active(interview) and InterviewService.is_live_interview_invited(interview):
+            schedule_url = reverse(
+                "interview_schedule:schedule",
+                kwargs={"token": self.kwargs["token"]},
+            )
+            context["schedule_url"] = schedule_url  # noqa
+
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

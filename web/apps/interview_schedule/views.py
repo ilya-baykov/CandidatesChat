@@ -26,7 +26,8 @@ class ScheduleView(View):
     _tz = pytz.timezone(TIME_ZONE)
     template_name = "interview_schedule/schedule.html"
 
-    def _get_interview_context(self, token: str) -> tuple[str, str, str]:
+    @staticmethod
+    def _get_interview_context(token: str) -> tuple[str, str, str]:
         """
         По токену достаём кандидата и рекрутера из БД.
         Возвращает (candidate_email, candidate_name, recruiter_email).
