@@ -13,3 +13,4 @@ class CandidateStatusEnum(IntEnum):
     INTERVIEW_PASSED = 7  # Интервью пройдено
     INTERVIEW_ERROR = 8  # Техническая ошибка
     REFUSAL_ERROR = 9  # Отказ от интервью
+    LIVE_INTERVIEW_INVITE = 10  # Приглашён на живое собеседование

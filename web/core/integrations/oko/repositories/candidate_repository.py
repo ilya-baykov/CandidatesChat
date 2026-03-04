@@ -11,6 +11,7 @@ class OkoCandidateRow(TypedDict):
     id: int
     email_address: str
     full_name: str
+    status_id: int
 
 
 class OkoCandidateRepository:
@@ -68,7 +69,7 @@ class OkoCandidateRepository:
         with OkoDBClient.cursor() as cursor:
             cursor.execute(
                 """
-                SELECT id, email_address, full_name
+                SELECT id, email_address, full_name, status_id
                 FROM public.candidates
                 WHERE id = %s
                 LIMIT 1
@@ -81,4 +82,4 @@ class OkoCandidateRepository:
             logger.warning("Кандидат не найден в БД ОКО | candidate_id=%s", candidate_id)
             return None
 
-        return OkoCandidateRow(**dict(zip(("id", "email_address", "full_name"), row)))
+        return OkoCandidateRow(**dict(zip(("id", "email_address", "full_name", "status_id"), row)))
