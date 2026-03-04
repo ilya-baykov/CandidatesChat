@@ -45,7 +45,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "api",
     "apps.interviews",
-    "apps.interview_schedul",
+    "apps.interview_schedule",
     "apps.reference",
 ]
 
@@ -117,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # ---------------------------------------------------------------------
 LANGUAGE_CODE = "ru-ru"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
 USE_TZ = True
 
@@ -236,4 +236,8 @@ SPECTACULAR_SETTINGS = {
     # аккуратные enum / null
     "ENUM_NAME_OVERRIDES": {},
 }
+GMAIL_TIMEZONE = "Europe/Moscow"
+GMAIL_CREDENTIALS_PATH = os.getenv("GMAIL_CREDENTIALS_PATH", default="credentials.json")
+GMAIL_TOKEN_PATH = os.getenv("GMAIL_TOKEN_PATH", default="token.json")
+GMAIL_SENDER = os.getenv("GMAIL_SENDER")
 # CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', "").split(',')

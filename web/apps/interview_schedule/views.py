@@ -1,38 +1,41 @@
 from __future__ import annotations
-import pytz
+
 import json
 import logging
 from datetime import datetime
 
+import pytz
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
 
+from config.settings.base import TIME_ZONE
 from .forms import BookSlotForm
 from .models import InterviewSlot
-from .services.meeting_slot_creator import generate_slots, slots_by_week, send_calendar_invite
+from .services.meeting_slot_creator import MeetingSlotCreator
+from .services.slot_generator import SlotGenerator
 
 logger = logging.getLogger(__name__)
 
 RECRUITER_EMAIL = "recruiter@example.com"  # TODO: move to settings / env
-TIMEZONE = "Europe/Moscow"
 
 
 class ScheduleView(View):
-    template_name = "interview_schedul/schedule.html"
+    _slot_generator = SlotGenerator()
+    _meeting_creator = MeetingSlotCreator()
+    _tz = pytz.timezone(TIME_ZONE)
+    template_name = "interview_schedule/schedule.html"
 
     def get(self, request):
-        slots = generate_slots(weeks=2)
-        grouped = slots_by_week(slots)
+        slots = self._slot_generator.generate(weeks=2)
         form = BookSlotForm()
 
-        tz = pytz.timezone(TIMEZONE)
         slots_json = [
             {
                 "iso": s.isoformat(),
-                "date": s.astimezone(tz).strftime("%Y-%m-%d"),
-                "time": s.astimezone(tz).strftime("%H:%M"),
-                "label": s.astimezone(tz).strftime("%d %b, %H:%M"),
+                "date": s.astimezone(self._tz).strftime("%Y-%m-%d"),
+                "time": s.astimezone(self._tz).strftime("%H:%M"),
+                "label": s.astimezone(self._tz).strftime("%d %b, %H:%M"),
             }
             for s in slots
         ]
@@ -53,7 +56,6 @@ class ScheduleView(View):
         candidate_email: str = form.cleaned_data["candidate_email"]
         candidate_name: str = form.cleaned_data["candidate_name"]
 
-        # Persist booking
         interview = InterviewSlot.objects.create(
             candidate_email=candidate_email,
             candidate_name=candidate_name,
@@ -62,20 +64,19 @@ class ScheduleView(View):
             duration_minutes=60,
         )
 
-        # Send calendar invite (best-effort)
-        msg_id = send_calendar_invite(
+        msg_id = self._meeting_creator.create(
             candidate_email=candidate_email,
             candidate_name=candidate_name,
             recruiter_email=RECRUITER_EMAIL,
             start=slot_dt,
         )
+
         if msg_id:
             interview.gmail_message_id = msg_id
             interview.status = InterviewSlot.STATUS_CONFIRMED
             interview.save(update_fields=["gmail_message_id", "status"])
 
-        tz = pytz.timezone(TIMEZONE)
-        local_dt = slot_dt.astimezone(tz)
+        local_dt = slot_dt.astimezone(self._tz)
 
         return JsonResponse(
             {
@@ -88,7 +89,7 @@ class ScheduleView(View):
 
 
 class SuccessView(View):
-    template_name = "interviews/success.html"
+    template_name = "interview_schedule/success.html"
 
     def get(self, request):
         return render(request, self.template_name)

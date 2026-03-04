@@ -7,7 +7,7 @@ from apps.interviews.services.interview_preparation.dto import CandidateContextD
 from core.integrations.oko.api.api_client import oko_client
 from core.integrations.oko.repositories.vacancy_repository import OkoVacancyRow
 from core.integrations.oko.services.vacancy_service import OkoVacancyService
-from core.utilities.pdf_extractor import PDFTextExtractor
+from core.utilities.extractors.pdf_extractor import PDFTextExtractor
 
 logger = logging.getLogger(__name__)
 

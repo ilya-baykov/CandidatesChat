@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from apps.interviews.services.ai_question_generation.dto import GeneratedQuestion
 from apps.interviews.services.ai_question_generation.prompts import PromptGenerator
 from core.ai_service.clients import NeuralGatewayClient, gpt_4_model
-from core.utilities.json_extractor import JsonExtractor
+from core.utilities.extractors.json_extractor import JsonExtractor
 
 logger = logging.getLogger(__name__)
 

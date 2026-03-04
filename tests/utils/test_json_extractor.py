@@ -1,4 +1,4 @@
-from core.utilities.json_extractor import JsonExtractor
+from core.utilities.extractors.json_extractor import JsonExtractor
 
 
 def test_extract_json_from_text():

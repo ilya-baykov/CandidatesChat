@@ -4,7 +4,7 @@ from apps.interviews.models import InterviewQuestion
 from apps.interviews.services.ai_answer_validation.dto import AnswerValidationResult
 from apps.interviews.services.ai_answer_validation.prompts import PromptGenerator
 from core.ai_service.clients import NeuralGatewayClient, gpt_4_model
-from core.utilities.json_extractor import JsonExtractor
+from core.utilities.extractors.json_extractor import JsonExtractor
 
 
 class AnswerValidator(ABC):
