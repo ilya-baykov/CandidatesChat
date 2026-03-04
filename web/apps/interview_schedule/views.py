@@ -17,7 +17,7 @@ from .services.slot_generator import SlotGenerator
 
 logger = logging.getLogger(__name__)
 
-RECRUITER_EMAIL = "recruiter@example.com"  # TODO: move to settings / env
+RECRUITER_EMAIL = "iterehofa@gmail.com"  # TODO
 
 
 class ScheduleView(View):
