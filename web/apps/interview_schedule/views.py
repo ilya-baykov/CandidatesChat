@@ -63,7 +63,7 @@ class ScheduleView(View):
     def get(self, request, token):
         candidate_email, candidate_name, recruiter_email = self._get_interview_context(token)
 
-        slots = self._slot_generator.generate(weeks=2)
+        slots = self._slot_generator.generate(weeks=2)  # todo:Заменить на реальные слоты из БД
         form = BookSlotForm(initial={"candidate_email": candidate_email})
 
         slots_json = [
