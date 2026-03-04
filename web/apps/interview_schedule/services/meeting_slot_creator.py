@@ -46,27 +46,22 @@ class MeetingSlotCreator:
         self._slot_duration_minutes = slot_duration_minutes
         self._invite_service = CalendarInviteService()
 
-    def create(
-            self,
-            *,
-            candidate_email: str,
-            candidate_name: str,
-            recruiter_email: str,
-            start: datetime,
-            location: str | None = None,
-            summary: str | None = None,
-            duration_minutes: int | None = None,
-    ) -> str | None:
-        """
-        Отправляет инвайт рекрутеру и подтверждение кандидату.
-        Возвращает Gmail Message ID или None при ошибке.
-        """
+    def create(self, *,
+               candidate_email: str,
+               candidate_name: str,
+               recruiter_email: str,
+               start: datetime,
+               location: str | None = None,
+               summary: str | None = None,
+               duration_minutes: int | None = None,
+               comment: str = "") -> bool:
+
         location = location or self._default_location
         summary = summary or self._default_summary
         duration_minutes = duration_minutes or self._slot_duration_minutes
 
         try:
-            message_id = self._invite_service.send_invite(
+            recruiter_msg_id = self._invite_service.send_invite(
                 EventParams(
                     recipient_email=recruiter_email,
                     start=start,
@@ -75,45 +70,21 @@ class MeetingSlotCreator:
                     duration_minutes=duration_minutes,
                 )
             )
-            self._send_candidate_confirmation(
-                candidate_email=candidate_email,
-                candidate_name=candidate_name,
-                recruiter_email=recruiter_email,
-                start=start,
-                location=location,
-                duration_minutes=duration_minutes,
+            logger.info("Инвайт рекрутеру отправлен | to=%s | message_id=%s", recruiter_email, recruiter_msg_id)
+
+            candidate_msg_id = self._invite_service.send_invite(
+                EventParams(
+                    recipient_email=candidate_email,
+                    start=start,
+                    summary=f"{summary} — {candidate_name}",
+                    location=location,
+                    duration_minutes=duration_minutes,
+                )
             )
-            return message_id
+            logger.info("Инвайт кандидату отправлен | to=%s | message_id=%s", candidate_email, candidate_msg_id)
 
-        except Exception:
-            logger.exception("Failed to create meeting slot")
-            return None
+            return bool(recruiter_msg_id and candidate_msg_id)
 
-    def _send_candidate_confirmation(
-            self,
-            *,
-            candidate_email: str,
-            candidate_name: str,
-            recruiter_email: str,
-            start: datetime,
-            location: str,
-            duration_minutes: int,
-    ) -> None:
-        local_start = start.astimezone(self._tz)
-        local_end = (start + timedelta(minutes=duration_minutes)).astimezone(self._tz)
-
-        body = EMAIL_ACCEPT_BODY_TEMPLATE.format(
-            candidate_name=candidate_name,
-            local_start=local_start,
-            local_end=local_end,
-            location=location,
-            recruiter_email=recruiter_email
-        )
-
-        send_mail(
-            subject="Ваше интервью подтверждено",
-            message=body,
-            from_email=recruiter_email,
-            recipient_list=[candidate_email],
-            fail_silently=True,
-        )
+        except Exception as e:
+            logger.exception("Failed to create meeting slot:%s", e)
+            return False

@@ -29,19 +29,19 @@ def send_calendar_invite_task(
     start = datetime.fromisoformat(start_iso)
 
     try:
-        msg_id = _meeting_creator.create(
+        result: bool = _meeting_creator.create(
             candidate_email=candidate_email,
             candidate_name=candidate_name,
             recruiter_email=recruiter_email,
             start=start
         )
-        if msg_id:
+        if result:
             InterviewSlot.objects.filter(pk=interview_id).update(
-                gmail_message_id=msg_id,
+                gmail_message_id="12345",
                 status=InterviewSlot.STATUS_CONFIRMED,
             )
-            logger.info("Interview %s Отправлено. Message ID: %s | to: %s",
-                        interview_id, msg_id, candidate_email)
+            logger.info("Interview %s Отправлено. | to: %s",
+                        interview_id, candidate_email)
         else:
             logger.warning("Interview %s: Приглашение не отправлено (msg_id is None)", interview_id)
     except Exception as exc:
