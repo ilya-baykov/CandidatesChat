@@ -12,8 +12,8 @@ from django.views import View
 from config.settings.base import TIME_ZONE
 from .forms import BookSlotForm
 from .models import InterviewSlot
-from .services.meeting_slot_creator import MeetingSlotCreator
 from .services.slot_generator import SlotGenerator
+from .tasks.triggers import start_send_calendar_invite
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,6 @@ RECRUITER_EMAIL = "iterehofa@gmail.com"  # TODO
 
 class ScheduleView(View):
     _slot_generator = SlotGenerator()
-    _meeting_creator = MeetingSlotCreator()
     _tz = pytz.timezone(TIME_ZONE)
     template_name = "interview_schedule/schedule.html"
 
@@ -64,17 +63,13 @@ class ScheduleView(View):
             duration_minutes=60,
         )
 
-        msg_id = self._meeting_creator.create(
+        start_send_calendar_invite(
+            interview_id=interview.pk,
             candidate_email=candidate_email,
             candidate_name=candidate_name,
             recruiter_email=RECRUITER_EMAIL,
             start=slot_dt,
         )
-
-        if msg_id:
-            interview.gmail_message_id = msg_id
-            interview.status = InterviewSlot.STATUS_CONFIRMED
-            interview.save(update_fields=["gmail_message_id", "status"])
 
         local_dt = slot_dt.astimezone(self._tz)
 
@@ -83,7 +78,7 @@ class ScheduleView(View):
                 "ok": True,
                 "message": "Приглашение отправлено!",
                 "slot_label": local_dt.strftime("%d %B %Y, %H:%M МСК"),
-                "invite_sent": bool(msg_id),
+                "invite_sent": True,  # задача поставлена в очередь — считаем успехом
             }
         )
 
