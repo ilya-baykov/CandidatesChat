@@ -15,6 +15,7 @@ class OkoVacancyRow(TypedDict):
     required_experience: str
     software_knowledge: str
     wishes_prompt: str
+    email_recruiter: str
 
 
 class OkoVacancyRepository:
@@ -34,7 +35,7 @@ class OkoVacancyRepository:
 
         select_query = """
             SELECT id, vacancy, city, job_title, main_responsibilities, 
-                   required_experience, software_knowledge, wishes_prompt 
+                   required_experience, software_knowledge, wishes_prompt, email_recruiter
             FROM public.candidate_search 
             WHERE id = %s
         """
@@ -47,7 +48,8 @@ class OkoVacancyRepository:
             return None
 
         columns = ("id", "vacancy", "city", "job_title",
-                   "main_responsibilities", "required_experience", "software_knowledge", "wishes_prompt")
+                   "main_responsibilities", "required_experience", "software_knowledge", "wishes_prompt",
+                   "email_recruiter")
 
         return OkoVacancyRow(**dict(zip(columns, row)))
 

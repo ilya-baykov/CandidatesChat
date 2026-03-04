@@ -40,7 +40,8 @@ def send_calendar_invite_task(
                 gmail_message_id=msg_id,
                 status=InterviewSlot.STATUS_CONFIRMED,
             )
-            logger.info("Interview %s Отправлено. Message ID: %s", interview_id, msg_id)
+            logger.info("Interview %s Отправлено. Message ID: %s | to: %s",
+                        interview_id, msg_id, candidate_email)
         else:
             logger.warning("Interview %s: Приглашение не отправлено (msg_id is None)", interview_id)
     except Exception as exc:

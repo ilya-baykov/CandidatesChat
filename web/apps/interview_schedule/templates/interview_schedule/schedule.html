@@ -240,7 +240,7 @@ body {
     <!-- Шаг 3: форма -->
     <div id="step-form" style="display:none">
       <div class="step-label">
-        Ваши данные
+        Подтверждение
         <button class="back-btn" onclick="goTo('step-time','step-form')">← назад</button>
       </div>
 
@@ -249,14 +249,21 @@ body {
         <span id="bannerText"></span>
       </div>
 
-      <div class="form-grid">
+      <div class="form-grid" style="grid-template-columns: 1fr;">
         <div class="field">
-          <label for="f-name">Имя</label>
-          <input id="f-name" type="text" placeholder="Иван Петров" autocomplete="name" oninput="validate()">
+          <label for="f-email">Email для приглашения</label>
+          <input id="f-email" type="email" autocomplete="email"
+                 value="{{ candidate_email }}" oninput="validate()">
         </div>
         <div class="field">
-          <label for="f-email">Email</label>
-          <input id="f-email" type="email" placeholder="ivan@example.com" autocomplete="email" oninput="validate()">
+          <label for="f-comment">Комментарий (необязательно)</label>
+          <textarea id="f-comment" rows="3"
+                    placeholder="Необязательно"
+                    style="padding:10px 13px; border:1.5px solid #c9a8f0; border-radius:10px;
+                           font-size:14px; font-family:Inter,Arial,sans-serif; outline:none;
+                           resize:vertical; transition:border-color .2s, box-shadow .2s;"
+                    onfocus="this.style.borderColor='#4B0082'"
+                    onblur="this.style.borderColor='#c9a8f0'"></textarea>
         </div>
       </div>
 
@@ -342,7 +349,7 @@ body {
         document.getElementById('f-slot').value = s.iso;
         const d = new Date(selectedDate + 'T00:00:00');
         document.getElementById('bannerText').textContent =
-          `${d.getDate()} ${MON_GN[d.getMonth()]} · ${s.time} МСК · Google Meet`;
+          `${d.getDate()} ${MON_GN[d.getMonth()]} · ${s.time} МСК · Outlook`;
         goTo('step-form', 'step-time');
         validate();
       };
@@ -352,10 +359,9 @@ body {
 
   /* валидация */
   window.validate = function () {
-    const name  = document.getElementById('f-name').value.trim();
     const email = document.getElementById('f-email').value.trim();
     document.getElementById('submitBtn').disabled =
-      !(name.length > 1 && /\S+@\S+\.\S+/.test(email) && selectedSlot);
+      !(/\S+@\S+\.\S+/.test(email) && selectedSlot);
   };
 
   /* сабмит */
@@ -365,8 +371,8 @@ body {
     btn.textContent = 'Отправляем…';
 
     const body = new URLSearchParams({
-      candidate_name:      document.getElementById('f-name').value.trim(),
       candidate_email:     document.getElementById('f-email').value.trim(),
+      comment:             document.getElementById('f-comment').value.trim(),
       slot:                document.getElementById('f-slot').value,
       csrfmiddlewaretoken: getCookie('csrftoken'),
     });

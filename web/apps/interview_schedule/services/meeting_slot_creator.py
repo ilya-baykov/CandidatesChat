@@ -36,8 +36,8 @@ class MeetingSlotCreator:
 
     def __init__(
             self,
-            default_location: str = "Google Meet",
-            default_summary: str = "Tech Interview",
+            default_location: str = "Outlook",
+            default_summary: str = "Интервью",
             slot_duration_minutes: int = SLOT_DURATION_MINUTES,
     ) -> None:
         self._tz = pytz.timezone(TIME_ZONE)

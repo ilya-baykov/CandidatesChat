@@ -20,7 +20,7 @@ class InterviewSlot(models.Model):
     recruiter_email = models.EmailField("Email рекрутера")
     start_datetime = models.DateTimeField("Начало интервью")
     duration_minutes = models.PositiveIntegerField("Длительность (мин)", default=60)
-    location = models.CharField("Место/ссылка", max_length=500, default="Google Meet")
+    location = models.CharField("Место/ссылка", max_length=500, default="Outlook")
     status = models.CharField(
         "Статус", max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING
     )

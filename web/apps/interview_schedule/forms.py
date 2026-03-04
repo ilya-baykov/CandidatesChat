@@ -1,23 +1,24 @@
+import pytz
+from datetime import datetime
 from django import forms
 
 
 class BookSlotForm(forms.Form):
-    candidate_name = forms.CharField(
-        label="Ваше имя",
-        max_length=255,
-        widget=forms.TextInput(attrs={"placeholder": "Иван Петров", "autocomplete": "name"}),
-    )
     candidate_email = forms.EmailField(
         label="Ваш email",
         widget=forms.EmailInput(attrs={"placeholder": "ivan@example.com", "autocomplete": "email"}),
+    )
+    comment = forms.CharField(
+        label="Комментарий",
+        required=False,
+        max_length=1000,
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Необязательно"}),
     )
     slot = forms.CharField(
         widget=forms.HiddenInput(),
     )
 
     def clean_slot(self):
-        from datetime import datetime
-        import pytz
 
         raw = self.cleaned_data.get("slot", "")
         tz = pytz.timezone("Europe/Moscow")

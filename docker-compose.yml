@@ -71,7 +71,7 @@ services:
       PYTHONPATH: /app/web
       REDIS_URL: redis://redis:6379/0
     volumes:
-      - ./secrets:/run/secrets:ro
+      - ./secrets:/run/secrets
     command: celery -A web.config worker -l info
 
 
